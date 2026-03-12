@@ -6,9 +6,10 @@ import os
 import re
 from typing import Any
 
-GEMINI_RESPONSE_SCHEMA = {
+REVIEW_RESULT_SCHEMA = {
     "type": "object",
     "properties": {
+        "review_id": {"type": "string"},
         "explanation": {"type": "string"},
         "attack_scenario": {"type": "string"},
         "fix": {"type": "string"},
@@ -16,8 +17,35 @@ GEMINI_RESPONSE_SCHEMA = {
         "review_decision": {"type": "string"},
         "confidence": {"type": "integer"},
     },
-    "required": ["explanation", "attack_scenario", "fix", "patched_code", "review_decision", "confidence"],
+    "required": [
+        "review_id",
+        "explanation",
+        "attack_scenario",
+        "fix",
+        "patched_code",
+        "review_decision",
+        "confidence",
+    ],
     "additionalProperties": False,
+}
+
+GEMINI_BATCH_RESPONSE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "reviews": {
+            "type": "array",
+            "items": REVIEW_RESULT_SCHEMA,
+        }
+    },
+    "required": ["reviews"],
+    "additionalProperties": False,
+}
+
+SEVERITY_PRIORITY = {
+    "CRITICAL": 0,
+    "HIGH": 1,
+    "MEDIUM": 2,
+    "LOW": 3,
 }
 
 FIX_LIBRARY: dict[str, dict[str, str]] = {
@@ -138,6 +166,9 @@ class ExplanationEngine:
         self.provider = os.getenv("CODESENTINEL_AI_PROVIDER", "gemini").lower()
         self.gemini_api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
         self.gemini_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        self.gemini_batch_size = max(1, int(os.getenv("CODESENTINEL_GEMINI_BATCH_SIZE", "8")))
+        self.max_ai_findings = max(0, int(os.getenv("CODESENTINEL_MAX_AI_FINDINGS", "24")))
+        self._gemini_client: Any | None = None
 
     def enrich_findings(self, findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
         reviewed, _stage_meta = self.review_findings(findings)
@@ -148,14 +179,69 @@ class ExplanationEngine:
         provider_counts: Counter[str] = Counter()
         decision_counts: Counter[str] = Counter()
         fallback_reasons: Counter[str] = Counter()
+        batch_calls = 0
 
-        for finding in findings:
-            reviewed_finding, metadata = self.review_finding(finding)
+        gemini_results: dict[str, dict[str, str | int]] = {}
+        failed_review_ids: set[str] = set()
+        skipped_due_to_cap: set[str] = set()
+
+        ai_candidate_ids = self._select_ai_candidate_ids(findings)
+        ai_candidate_set = set(ai_candidate_ids)
+
+        if self.provider == "gemini" and self.gemini_api_key and ai_candidate_ids:
+            batches = [
+                ai_candidate_ids[index:index + self.gemini_batch_size]
+                for index in range(0, len(ai_candidate_ids), self.gemini_batch_size)
+            ]
+            batch_calls = len(batches)
+
+            for batch_ids in batches:
+                batch_findings = [(review_id, findings[int(review_id.split("_")[1])]) for review_id in batch_ids]
+                batch_results = self._try_gemini_batch(batch_findings)
+                if not batch_results:
+                    failed_review_ids.update(batch_ids)
+                    continue
+
+                gemini_results.update(batch_results)
+                missing_ids = set(batch_ids) - set(batch_results)
+                failed_review_ids.update(missing_ids)
+
+        if self.max_ai_findings and len(findings) > len(ai_candidate_ids):
+            skipped_due_to_cap = {
+                self._review_id(index)
+                for index, _finding in enumerate(findings)
+                if self._review_id(index) not in ai_candidate_set
+            }
+
+        for index, finding in enumerate(findings):
+            review_id = self._review_id(index)
+            provider_used = "local"
+            fallback_reason: str | None = None
+
+            if review_id in gemini_results:
+                reviewed_finding = self._merge_gemini_review(finding, gemini_results[review_id])
+                provider_used = "gemini"
+            else:
+                if self.provider != "gemini":
+                    fallback_reason = "Gemini review is disabled by configuration."
+                elif not self.gemini_api_key:
+                    fallback_reason = "GEMINI_API_KEY is not configured."
+                elif review_id in skipped_due_to_cap:
+                    fallback_reason = (
+                        f"Skipped Gemini review to keep scan latency bounded to the top {self.max_ai_findings} finding(s)."
+                    )
+                elif review_id in failed_review_ids:
+                    fallback_reason = "Gemini batch review failed or returned an incomplete response."
+                else:
+                    fallback_reason = "Gemini review was not applied."
+
+                reviewed_finding = self._apply_local_review(finding, fallback_reason)
+
             reviewed_findings.append(reviewed_finding)
-            provider_counts[str(metadata["provider_used"])] += 1
+            provider_counts[provider_used] += 1
             decision_counts[str(reviewed_finding["review_decision"])] += 1
-            if metadata.get("fallback_reason"):
-                fallback_reasons[str(metadata["fallback_reason"])] += 1
+            if fallback_reason:
+                fallback_reasons[fallback_reason] += 1
 
         if provider_counts.get("gemini", 0) and provider_counts.get("local", 0):
             status = "completed_with_fallback"
@@ -168,7 +254,8 @@ class ExplanationEngine:
 
         summary = (
             f"Primary AI provider: Gemini. Reviewed {len(findings)} finding(s); "
-            f"{provider_counts.get('gemini', 0)} with Gemini and {provider_counts.get('local', 0)} via deterministic fallback."
+            f"{provider_counts.get('gemini', 0)} with Gemini in {batch_calls} batch call(s) and "
+            f"{provider_counts.get('local', 0)} via deterministic fallback."
         )
 
         return reviewed_findings, {
@@ -182,45 +269,74 @@ class ExplanationEngine:
                 "decision_breakdown": dict(decision_counts),
                 "fallback_reasons": dict(fallback_reasons),
                 "model": self.gemini_model,
+                "batch_size": self.gemini_batch_size,
+                "batch_calls": batch_calls,
+                "max_ai_findings": self.max_ai_findings,
             },
         }
 
-    def review_finding(self, finding: dict[str, Any]) -> tuple[dict[str, Any], dict[str, str | None]]:
+    def _select_ai_candidate_ids(self, findings: list[dict[str, Any]]) -> list[str]:
+        if self.max_ai_findings <= 0 or not findings:
+            return []
+
+        prioritized_indices = sorted(
+            range(len(findings)),
+            key=lambda index: (
+                SEVERITY_PRIORITY.get(str(findings[index].get("severity", "LOW")).upper(), 99),
+                -int(findings[index].get("confidence", 0)),
+                int(findings[index].get("line", 0)),
+                index,
+            ),
+        )
+        selected = prioritized_indices[: self.max_ai_findings]
+        return [self._review_id(index) for index in selected]
+
+    def _compact_finding_for_ai(self, review_id: str, finding: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "review_id": review_id,
+            "line": int(finding.get("line", 0)),
+            "type": str(finding.get("type", "")),
+            "severity": str(finding.get("severity", "")),
+            "owasp_category": str(finding.get("owasp_category", "")),
+            "filename": str(finding.get("filename", "")),
+            "language": str(finding.get("language", "")),
+            "snippet": str(finding.get("snippet", "")),
+            "description": str(finding.get("description", "")),
+        }
+
+    def _apply_local_review(self, finding: dict[str, Any], fallback_reason: str | None) -> dict[str, Any]:
         enriched = finding.copy()
-        provider_used = "local"
-        fallback_reason: str | None = None
-
-        if self.provider == "gemini":
-            if not self.gemini_api_key:
-                fallback_reason = "GEMINI_API_KEY is not configured."
-            else:
-                llm_result = self._try_gemini(finding)
-                if llm_result:
-                    enriched.update(llm_result)
-                    provider_used = "gemini"
-                else:
-                    fallback_reason = "Gemini response failed validation or was unavailable."
-
-        if provider_used != "gemini":
-            enriched.update(self._local_explanation(finding))
+        enriched.update(self._local_explanation(finding))
 
         review_pipeline = dict(enriched.get("review_pipeline") or {})
         review_pipeline["stage_2"] = {
             "name": "Stage 2 - Gemini AI Review",
-            "status": "validated" if provider_used == "gemini" else "fallback_applied",
-            "provider": provider_used,
+            "status": "fallback_applied",
+            "provider": "local",
             "confidence": int(enriched.get("confidence", 0)),
-            "summary": (
-                "Gemini validated the stage 1 signal and generated contextual remediation guidance."
-                if provider_used == "gemini"
-                else "Gemini was unavailable, so deterministic local guidance was used and the finding should be manually confirmed."
-            ),
+            "summary": "Gemini was not used for this finding, so deterministic local guidance was applied.",
             "fallback_reason": fallback_reason,
         }
         enriched["review_pipeline"] = review_pipeline
-        enriched["ai_provider"] = provider_used
+        enriched["ai_provider"] = "local"
+        return enriched
 
-        return enriched, {"provider_used": provider_used, "fallback_reason": fallback_reason}
+    def _merge_gemini_review(self, finding: dict[str, Any], gemini_result: dict[str, str | int]) -> dict[str, Any]:
+        enriched = finding.copy()
+        enriched.update(gemini_result)
+
+        review_pipeline = dict(enriched.get("review_pipeline") or {})
+        review_pipeline["stage_2"] = {
+            "name": "Stage 2 - Gemini AI Review",
+            "status": "validated",
+            "provider": "gemini",
+            "confidence": int(enriched.get("confidence", 0)),
+            "summary": "Gemini validated the stage 1 signal and generated contextual remediation guidance.",
+            "fallback_reason": None,
+        }
+        enriched["review_pipeline"] = review_pipeline
+        enriched["ai_provider"] = "gemini"
+        return enriched
 
     def _local_explanation(self, finding: dict[str, Any]) -> dict[str, str | int]:
         vulnerability_type = str(finding.get("type", ""))
@@ -249,43 +365,41 @@ class ExplanationEngine:
             "confidence": confidence,
         }
 
-    def _try_gemini(self, finding: dict[str, Any]) -> dict[str, str | int] | None:
+    def _try_gemini_batch(self, batch_findings: list[tuple[str, dict[str, Any]]]) -> dict[str, dict[str, str | int]] | None:
+        if not batch_findings:
+            return {}
+
+        client = self._get_gemini_client()
+        if client is None:
+            return None
+
         try:
-            from google import genai
             from google.genai import types
         except ImportError:
             return None
 
         prompt = {
-            "task": "Validate a secure code review finding, explain the risk, and propose a safe replacement.",
+            "task": "Validate a batch of secure code review findings, explain the risk, and propose safe replacements.",
             "instructions": [
                 "You are stage 2 in a three-stage application security review system.",
-                "Stage 1 has already flagged a deterministic security signal.",
+                "Stage 1 has already flagged deterministic security signals.",
                 "Return JSON only.",
-                "Set review_decision to confirmed when the finding is strongly supported by the code snippet.",
-                "Set review_decision to needs_manual_review when the risk depends on surrounding context not shown here.",
+                "Return one review object for every review_id you are given.",
+                "Set review_decision to confirmed when the finding is strongly supported by the snippet.",
+                "Set review_decision to needs_manual_review when surrounding context is required.",
                 "Set confidence to an integer from 0 to 100.",
             ],
-            "finding": finding,
-            "response_format": {
-                "explanation": "plain English explanation",
-                "attack_scenario": "short concrete attack path",
-                "fix": "secure remediation guidance",
-                "patched_code": "patched replacement code sample",
-                "review_decision": "confirmed or needs_manual_review",
-                "confidence": "integer 0-100",
-            },
+            "findings": [self._compact_finding_for_ai(review_id, finding) for review_id, finding in batch_findings],
         }
 
         try:
-            client = genai.Client(api_key=self.gemini_api_key)
             response = client.models.generate_content(
                 model=self.gemini_model,
                 contents=json.dumps(prompt),
                 config=types.GenerateContentConfig(
                     system_instruction="You are a senior application security engineer. Return strict JSON only.",
                     response_mime_type="application/json",
-                    response_json_schema=GEMINI_RESPONSE_SCHEMA,
+                    response_json_schema=GEMINI_BATCH_RESPONSE_SCHEMA,
                     temperature=0.1,
                 ),
             )
@@ -294,7 +408,7 @@ class ExplanationEngine:
 
         parsed = getattr(response, "parsed", None)
         if isinstance(parsed, dict):
-            return self._validate_llm_payload(parsed)
+            return self._validate_batch_payload(parsed)
 
         text = getattr(response, "text", "") or ""
         try:
@@ -308,13 +422,31 @@ class ExplanationEngine:
             except json.JSONDecodeError:
                 return None
 
-        return self._validate_llm_payload(parsed)
+        return self._validate_batch_payload(parsed)
 
-    def _validate_llm_payload(self, payload: Any) -> dict[str, str | int] | None:
+    def _validate_batch_payload(self, payload: Any) -> dict[str, dict[str, str | int]] | None:
         if not isinstance(payload, dict):
             return None
 
-        required_fields = {"explanation", "attack_scenario", "fix", "patched_code", "review_decision", "confidence"}
+        reviews = payload.get("reviews")
+        if not isinstance(reviews, list):
+            return None
+
+        validated: dict[str, dict[str, str | int]] = {}
+        for review in reviews:
+            validated_item = self._validate_review_payload(review)
+            if not validated_item:
+                continue
+            review_id = str(review["review_id"])
+            validated[review_id] = validated_item
+
+        return validated if validated else None
+
+    def _validate_review_payload(self, payload: Any) -> dict[str, str | int] | None:
+        if not isinstance(payload, dict):
+            return None
+
+        required_fields = {"review_id", "explanation", "attack_scenario", "fix", "patched_code", "review_decision", "confidence"}
         if not required_fields.issubset(payload):
             return None
 
@@ -337,3 +469,18 @@ class ExplanationEngine:
             "review_decision": review_decision,
             "confidence": confidence,
         }
+
+    def _get_gemini_client(self) -> Any | None:
+        if self._gemini_client is not None:
+            return self._gemini_client
+
+        try:
+            from google import genai
+        except ImportError:
+            return None
+
+        self._gemini_client = genai.Client(api_key=self.gemini_api_key)
+        return self._gemini_client
+
+    def _review_id(self, index: int) -> str:
+        return f"finding_{index}"

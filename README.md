@@ -8,6 +8,9 @@ The review flow is intentionally split into three stages:
 2. Gemini AI validation for contextual explanation, confidence, and remediation.
 3. OWASP Top 10 correlation plus weighted security scoring.
 
+To keep scan latency reasonable on larger repositories, stage 2 uses batched Gemini reviews and caps AI validation to
+the highest-priority findings by default.
+
 ## Stack
 
 - Frontend: React, Vite, TailwindCSS, Monaco Editor
@@ -75,7 +78,15 @@ Gemini is the primary AI review stage. If no Gemini key is configured, the backe
 set GEMINI_API_KEY=your_key
 set CODESENTINEL_AI_PROVIDER=gemini
 set GEMINI_MODEL=gemini-2.5-flash
+set CODESENTINEL_GEMINI_BATCH_SIZE=8
+set CODESENTINEL_MAX_AI_FINDINGS=24
 ```
+
+Performance tuning:
+
+- `CODESENTINEL_GEMINI_BATCH_SIZE`: number of findings reviewed per Gemini request
+- `CODESENTINEL_MAX_AI_FINDINGS`: maximum number of findings sent to Gemini per scan
+- findings above the AI cap still appear in the report, but use deterministic local remediation so scans stay fast
 
 ## API Endpoints
 

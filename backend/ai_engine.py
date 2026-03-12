@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 from collections import Counter
+import hashlib
 import json
 import os
+from pathlib import Path
 import re
 from typing import Any
+
+from cache_store import JsonCacheStore
+from project_config import load_project_config
 
 REVIEW_RESULT_SCHEMA = {
     "type": "object",
@@ -47,6 +52,16 @@ SEVERITY_PRIORITY = {
     "MEDIUM": 2,
     "LOW": 3,
 }
+
+SENSITIVE_VALUE_PATTERNS = (
+    re.compile(r'(?i)\b(api[_-]?key|secret|token|password|passwd|pwd|client[_-]?secret)\b\s*[:=]\s*["\'][^"\']+["\']'),
+    re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
+    re.compile(r"(?i)bearer\s+[A-Za-z0-9._\-]+"),
+)
+
+PRIVATE_URL_PATTERN = re.compile(
+    r"(?i)\bhttps?://(?:127\.0\.0\.1|localhost|10\.\d+\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[0-1])\.\d+\.\d+|192\.168\.\d+\.\d+)[^\s\"']*"
+)
 
 FIX_LIBRARY: dict[str, dict[str, str]] = {
     "SQL Injection": {
@@ -168,7 +183,11 @@ class ExplanationEngine:
         self.gemini_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
         self.gemini_batch_size = max(1, int(os.getenv("CODESENTINEL_GEMINI_BATCH_SIZE", "8")))
         self.max_ai_findings = max(0, int(os.getenv("CODESENTINEL_MAX_AI_FINDINGS", "24")))
+        self.enable_ai_cache = os.getenv("CODESENTINEL_ENABLE_AI_CACHE", "true").lower() != "false"
+        self.project_config = load_project_config()
         self._gemini_client: Any | None = None
+        cache_path = Path(__file__).resolve().parent / ".tmp" / "ai_review_cache.json"
+        self._cache = JsonCacheStore(cache_path)
 
     def enrich_findings(self, findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
         reviewed, _stage_meta = self.review_findings(findings)
@@ -180,56 +199,90 @@ class ExplanationEngine:
         decision_counts: Counter[str] = Counter()
         fallback_reasons: Counter[str] = Counter()
         batch_calls = 0
+        cached_reviews = 0
+        redacted_reviews = 0
+        cached_review_ids: set[str] = set()
 
         gemini_results: dict[str, dict[str, str | int]] = {}
         failed_review_ids: set[str] = set()
         skipped_due_to_cap: set[str] = set()
+        skipped_due_to_threshold: set[str] = set()
 
         ai_candidate_ids = self._select_ai_candidate_ids(findings)
         ai_candidate_set = set(ai_candidate_ids)
+        skipped_due_to_threshold = {
+            self._review_id(index)
+            for index, finding in enumerate(findings)
+            if not self.project_config.severity_allows_ai(str(finding.get("severity", "LOW")))
+        }
 
-        if self.provider == "gemini" and self.gemini_api_key and ai_candidate_ids:
-            batches = [
-                ai_candidate_ids[index:index + self.gemini_batch_size]
-                for index in range(0, len(ai_candidate_ids), self.gemini_batch_size)
-            ]
-            batch_calls = len(batches)
+        if self.provider == "gemini" and ai_candidate_ids:
+            cached_payload = self._get_cached_reviews(
+                {
+                    review_id: findings[int(review_id.split("_")[1])]
+                    for review_id in ai_candidate_ids
+                }
+            )
+            gemini_results.update(cached_payload["results"])
+            cached_reviews = int(cached_payload["count"])
+            redacted_reviews += int(cached_payload["redacted"])
+            cached_review_ids = set(cached_payload["results"])
 
-            for batch_ids in batches:
-                batch_findings = [(review_id, findings[int(review_id.split("_")[1])]) for review_id in batch_ids]
-                batch_results = self._try_gemini_batch(batch_findings)
-                if not batch_results:
-                    failed_review_ids.update(batch_ids)
-                    continue
+            uncached_ids = [review_id for review_id in ai_candidate_ids if review_id not in gemini_results]
 
-                gemini_results.update(batch_results)
-                missing_ids = set(batch_ids) - set(batch_results)
-                failed_review_ids.update(missing_ids)
+            if uncached_ids and self.gemini_api_key:
+                batches = [
+                    uncached_ids[index:index + self.gemini_batch_size]
+                    for index in range(0, len(uncached_ids), self.gemini_batch_size)
+                ]
+                batch_calls = len(batches)
+
+                for batch_ids in batches:
+                    batch_findings = [(review_id, findings[int(review_id.split("_")[1])]) for review_id in batch_ids]
+                    batch_results = self._try_gemini_batch(batch_findings)
+                    if not batch_results:
+                        failed_review_ids.update(batch_ids)
+                        continue
+
+                    gemini_results.update(batch_results)
+                    self._store_cached_reviews(batch_findings, batch_results)
+                    missing_ids = set(batch_ids) - set(batch_results)
+                    failed_review_ids.update(missing_ids)
+                    redacted_reviews += sum(
+                        1 for review_id, finding in batch_findings if self._redact_finding_for_ai(review_id, finding)["redacted"]
+                    )
 
         if self.max_ai_findings and len(findings) > len(ai_candidate_ids):
             skipped_due_to_cap = {
                 self._review_id(index)
                 for index, _finding in enumerate(findings)
-                if self._review_id(index) not in ai_candidate_set
+                if self._review_id(index) not in ai_candidate_set and self._review_id(index) not in skipped_due_to_threshold
             }
 
         for index, finding in enumerate(findings):
             review_id = self._review_id(index)
             provider_used = "local"
+            provider_label = "local"
             fallback_reason: str | None = None
 
             if review_id in gemini_results:
-                reviewed_finding = self._merge_gemini_review(finding, gemini_results[review_id])
+                provider_label = "gemini-cache" if review_id in cached_review_ids else "gemini"
+                reviewed_finding = self._merge_gemini_review(finding, gemini_results[review_id], provider=provider_label)
                 provider_used = "gemini"
             else:
                 if self.provider != "gemini":
                     fallback_reason = "Gemini review is disabled by configuration."
-                elif not self.gemini_api_key:
-                    fallback_reason = "GEMINI_API_KEY is not configured."
+                elif review_id in skipped_due_to_threshold:
+                    fallback_reason = (
+                        f"Skipped Gemini review because project policy only sends {self.project_config.ai_min_severity} "
+                        "or higher findings to the model."
+                    )
                 elif review_id in skipped_due_to_cap:
                     fallback_reason = (
                         f"Skipped Gemini review to keep scan latency bounded to the top {self.max_ai_findings} finding(s)."
                     )
+                elif not self.gemini_api_key:
+                    fallback_reason = "GEMINI_API_KEY is not configured."
                 elif review_id in failed_review_ids:
                     fallback_reason = "Gemini batch review failed or returned an incomplete response."
                 else:
@@ -254,7 +307,7 @@ class ExplanationEngine:
 
         summary = (
             f"Primary AI provider: Gemini. Reviewed {len(findings)} finding(s); "
-            f"{provider_counts.get('gemini', 0)} with Gemini in {batch_calls} batch call(s) and "
+            f"{provider_counts.get('gemini', 0)} with Gemini or cache in {batch_calls} live batch call(s) and "
             f"{provider_counts.get('local', 0)} via deterministic fallback."
         )
 
@@ -272,6 +325,9 @@ class ExplanationEngine:
                 "batch_size": self.gemini_batch_size,
                 "batch_calls": batch_calls,
                 "max_ai_findings": self.max_ai_findings,
+                "min_severity": self.project_config.ai_min_severity,
+                "cached_reviews": cached_reviews,
+                "redacted_reviews": redacted_reviews,
             },
         }
 
@@ -279,8 +335,13 @@ class ExplanationEngine:
         if self.max_ai_findings <= 0 or not findings:
             return []
 
+        eligible_indices = [
+            index
+            for index, finding in enumerate(findings)
+            if self.project_config.severity_allows_ai(str(finding.get("severity", "LOW")))
+        ]
         prioritized_indices = sorted(
-            range(len(findings)),
+            eligible_indices,
             key=lambda index: (
                 SEVERITY_PRIORITY.get(str(findings[index].get("severity", "LOW")).upper(), 99),
                 -int(findings[index].get("confidence", 0)),
@@ -292,7 +353,29 @@ class ExplanationEngine:
         return [self._review_id(index) for index in selected]
 
     def _compact_finding_for_ai(self, review_id: str, finding: dict[str, Any]) -> dict[str, Any]:
+        redacted_payload = self._redact_finding_for_ai(review_id, finding)
+        payload = redacted_payload["payload"]
         return {
+            "review_id": review_id,
+            "line": int(payload.get("line", 0)),
+            "type": str(payload.get("type", "")),
+            "severity": str(payload.get("severity", "")),
+            "owasp_category": str(payload.get("owasp_category", "")),
+            "filename": str(payload.get("filename", "")),
+            "language": str(payload.get("language", "")),
+            "snippet": str(payload.get("snippet", "")),
+            "description": str(payload.get("description", "")),
+        }
+
+    def _redact_sensitive_text(self, value: str) -> str:
+        updated = value
+        for pattern in SENSITIVE_VALUE_PATTERNS:
+            updated = pattern.sub("[REDACTED_SECRET]", updated)
+        updated = PRIVATE_URL_PATTERN.sub("https://[internal-host-redacted]", updated)
+        return updated
+
+    def _redact_finding_for_ai(self, review_id: str, finding: dict[str, Any]) -> dict[str, Any]:
+        sanitized = {
             "review_id": review_id,
             "line": int(finding.get("line", 0)),
             "type": str(finding.get("type", "")),
@@ -303,6 +386,68 @@ class ExplanationEngine:
             "snippet": str(finding.get("snippet", "")),
             "description": str(finding.get("description", "")),
         }
+        redacted = False
+
+        for field_name in ("snippet", "description"):
+            value = str(sanitized.get(field_name, ""))
+            updated = self._redact_sensitive_text(value)
+            if updated != value:
+                redacted = True
+            sanitized[field_name] = updated
+
+        return {"payload": sanitized, "redacted": redacted}
+
+    def _cache_key_for_finding(self, review_id: str, finding: dict[str, Any]) -> str:
+        payload = self._redact_finding_for_ai(review_id, finding)["payload"]
+        stable_payload = {
+            "model": self.gemini_model,
+            "type": payload["type"],
+            "severity": payload["severity"],
+            "owasp_category": payload["owasp_category"],
+            "filename": payload["filename"],
+            "language": payload["language"],
+            "snippet": payload["snippet"],
+            "description": payload["description"],
+        }
+        encoded = json.dumps(stable_payload, sort_keys=True).encode("utf-8")
+        return hashlib.sha256(encoded).hexdigest()
+
+    def _get_cached_reviews(self, findings_by_id: dict[str, dict[str, Any]]) -> dict[str, Any]:
+        if not self.enable_ai_cache or not findings_by_id:
+            return {"results": {}, "count": 0, "redacted": 0}
+
+        key_lookup = {
+            review_id: self._cache_key_for_finding(review_id, finding)
+            for review_id, finding in findings_by_id.items()
+        }
+        cached = self._cache.get_many(list(key_lookup.values()))
+
+        results: dict[str, dict[str, str | int]] = {}
+        redacted_count = 0
+        for review_id, cache_key in key_lookup.items():
+            cached_value = cached.get(cache_key)
+            if isinstance(cached_value, dict):
+                results[review_id] = cached_value
+            if self._redact_finding_for_ai(review_id, findings_by_id[review_id])["redacted"]:
+                redacted_count += 1
+
+        return {"results": results, "count": len(results), "redacted": redacted_count}
+
+    def _store_cached_reviews(
+        self,
+        batch_findings: list[tuple[str, dict[str, Any]]],
+        batch_results: dict[str, dict[str, str | int]],
+    ) -> None:
+        if not self.enable_ai_cache or not batch_results:
+            return
+
+        cache_payload: dict[str, dict[str, str | int]] = {}
+        for review_id, finding in batch_findings:
+            if review_id not in batch_results:
+                continue
+            cache_payload[self._cache_key_for_finding(review_id, finding)] = batch_results[review_id]
+
+        self._cache.set_many(cache_payload)
 
     def _apply_local_review(self, finding: dict[str, Any], fallback_reason: str | None) -> dict[str, Any]:
         enriched = finding.copy()
@@ -321,7 +466,13 @@ class ExplanationEngine:
         enriched["ai_provider"] = "local"
         return enriched
 
-    def _merge_gemini_review(self, finding: dict[str, Any], gemini_result: dict[str, str | int]) -> dict[str, Any]:
+    def _merge_gemini_review(
+        self,
+        finding: dict[str, Any],
+        gemini_result: dict[str, str | int],
+        *,
+        provider: str = "gemini",
+    ) -> dict[str, Any]:
         enriched = finding.copy()
         enriched.update(gemini_result)
 
@@ -329,13 +480,13 @@ class ExplanationEngine:
         review_pipeline["stage_2"] = {
             "name": "Stage 2 - Gemini AI Review",
             "status": "validated",
-            "provider": "gemini",
+            "provider": provider,
             "confidence": int(enriched.get("confidence", 0)),
             "summary": "Gemini validated the stage 1 signal and generated contextual remediation guidance.",
             "fallback_reason": None,
         }
         enriched["review_pipeline"] = review_pipeline
-        enriched["ai_provider"] = "gemini"
+        enriched["ai_provider"] = provider
         return enriched
 
     def _local_explanation(self, finding: dict[str, Any]) -> dict[str, str | int]:
@@ -378,18 +529,20 @@ class ExplanationEngine:
         except ImportError:
             return None
 
+        redacted_batch = [self._compact_finding_for_ai(review_id, finding) for review_id, finding in batch_findings]
         prompt = {
             "task": "Validate a batch of secure code review findings, explain the risk, and propose safe replacements.",
             "instructions": [
                 "You are stage 2 in a three-stage application security review system.",
                 "Stage 1 has already flagged deterministic security signals.",
+                "Treat snippets as sanitized excerpts, not full files.",
                 "Return JSON only.",
                 "Return one review object for every review_id you are given.",
                 "Set review_decision to confirmed when the finding is strongly supported by the snippet.",
                 "Set review_decision to needs_manual_review when surrounding context is required.",
                 "Set confidence to an integer from 0 to 100.",
             ],
-            "findings": [self._compact_finding_for_ai(review_id, finding) for review_id, finding in batch_findings],
+            "findings": redacted_batch,
         }
 
         try:
@@ -473,6 +626,9 @@ class ExplanationEngine:
     def _get_gemini_client(self) -> Any | None:
         if self._gemini_client is not None:
             return self._gemini_client
+
+        if not self.gemini_api_key:
+            return None
 
         try:
             from google import genai

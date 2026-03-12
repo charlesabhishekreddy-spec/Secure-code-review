@@ -1,13 +1,16 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { EmptyResultsState } from "../components/EmptyResultsState";
 import { ResultsSummary } from "../components/ResultsSummary";
 import { ResultsTable } from "../components/ResultsTable";
 import { ReviewStages } from "../components/ReviewStages";
+import { ScanHistoryPanel } from "../components/ScanHistoryPanel";
 import { useScanContext } from "../context/ScanContext";
 
 export function ResultsPage() {
-  const { results } = useScanContext();
+  const { results, scanHistory, clearHistory, restoreHistoryEntry } = useScanContext();
+  const [selectedHistoryId, setSelectedHistoryId] = useState(scanHistory[1]?.id || "");
 
   if (!results) {
     return <EmptyResultsState />;
@@ -31,7 +34,15 @@ export function ResultsPage() {
 
       <ResultsSummary results={results} />
       <ReviewStages stages={results.review_stages || []} />
-      <ResultsTable vulnerabilities={results.vulnerabilities} />
+      <ScanHistoryPanel
+        currentResults={results}
+        history={scanHistory}
+        selectedHistoryId={selectedHistoryId}
+        onSelectHistory={setSelectedHistoryId}
+        onOpenHistory={restoreHistoryEntry}
+        onClearHistory={clearHistory}
+      />
+      <ResultsTable vulnerabilities={results.vulnerabilities || []} />
     </div>
   );
 }

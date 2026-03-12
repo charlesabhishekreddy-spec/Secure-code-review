@@ -1,18 +1,43 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { scanCode, scanGitHubRepository, uploadCode } from "../api/client";
+import { getScanJob, scanCode, submitGitHubScanJob, uploadCode } from "../api/client";
 import { EditorWorkspace } from "../components/EditorWorkspace";
+import { RepositoryJobStatus } from "../components/RepositoryJobStatus";
 import { RepositoryScanForm } from "../components/RepositoryScanForm";
+import { SessionSettingsPanel } from "../components/SessionSettingsPanel";
 import { UploadZone } from "../components/UploadZone";
 import { useScanContext } from "../context/ScanContext";
 import { detectLanguageFromFilename, filenameForLanguage, languageOptions } from "../utils/language";
+
+function sleep(duration) {
+  return new Promise((resolve) => window.setTimeout(resolve, duration));
+}
 
 export function ScannerPage() {
   const navigate = useNavigate();
   const [repoUrl, setRepoUrl] = useState("");
   const [repoBranch, setRepoBranch] = useState("");
-  const { editorState, setEditorState, setResults, loading, setLoading, error, setError } = useScanContext();
+  const [repoJob, setRepoJob] = useState(null);
+  const {
+    editorState,
+    setEditorState,
+    results,
+    saveResults,
+    sessionSettings,
+    setSessionSettings,
+    loading,
+    setLoading,
+    error,
+    setError
+  } = useScanContext();
+
+  const editorMarkers =
+    sessionSettings.showMonacoMarkers &&
+    results?.source?.filename &&
+    results.source.filename === (editorState.filename || filenameForLanguage(editorState.language))
+      ? (results.vulnerabilities || []).filter((item) => item.filename === results.source.filename || item.filename === editorState.filename)
+      : [];
 
   function updateCode(nextCode) {
     setEditorState((current) => ({
@@ -54,23 +79,48 @@ export function ScannerPage() {
 
     setLoading(true);
     setError("");
+    setRepoJob(null);
 
     try {
       const payload =
         editorState.file && !editorState.dirty
-          ? await uploadCode(editorState.file)
-          : await scanCode({
-              code: editorState.code,
-              language: editorState.language,
-              filename: editorState.filename || filenameForLanguage(editorState.language)
-            });
+          ? await uploadCode(editorState.file, { apiToken: sessionSettings.apiToken })
+          : await scanCode(
+              {
+                code: editorState.code,
+                language: editorState.language,
+                filename: editorState.filename || filenameForLanguage(editorState.language)
+              },
+              { apiToken: sessionSettings.apiToken }
+            );
 
-      setResults(payload);
-      navigate("/results");
+      saveResults(payload, { mode: "editor" });
+      if (sessionSettings.autoOpenResults) {
+        navigate("/results");
+      }
     } catch (scanError) {
       setError(scanError.message || "Scan failed.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function waitForRepositoryJob(jobId) {
+    while (true) {
+      await sleep(Math.max(1000, Number(sessionSettings.repoPollIntervalMs) || 2000));
+      const nextJob = await getScanJob(jobId, { apiToken: sessionSettings.apiToken });
+      setRepoJob({
+        ...nextJob,
+        jobId: nextJob.job_id
+      });
+
+      if (nextJob.status === "completed") {
+        return nextJob.result;
+      }
+
+      if (nextJob.status === "failed") {
+        throw new Error(nextJob.error || "Repository scan failed.");
+      }
     }
   }
 
@@ -84,9 +134,20 @@ export function ScannerPage() {
     setError("");
 
     try {
-      const payload = await scanGitHubRepository(repoUrl.trim(), repoBranch.trim());
-      setResults(payload);
-      navigate("/results");
+      const job = await submitGitHubScanJob(repoUrl.trim(), repoBranch.trim(), {
+        apiToken: sessionSettings.apiToken
+      });
+
+      setRepoJob({
+        ...job,
+        jobId: job.job_id
+      });
+
+      const payload = await waitForRepositoryJob(job.job_id);
+      saveResults(payload, { mode: "repository" });
+      if (sessionSettings.autoOpenResults) {
+        navigate("/results");
+      }
     } catch (scanError) {
       setError(scanError.message || "Repository scan failed.");
     } finally {
@@ -149,6 +210,7 @@ export function ScannerPage() {
           code={editorState.code}
           language={editorState.language}
           filename={editorState.filename}
+          markers={editorMarkers}
           onChange={updateCode}
         />
         <div className="space-y-6">
@@ -166,14 +228,16 @@ export function ScannerPage() {
             onSubmit={handleRepositoryScan}
             disabled={loading}
           />
+          <RepositoryJobStatus job={repoJob} />
+          <SessionSettingsPanel settings={sessionSettings} onChange={setSessionSettings} disabled={loading} />
           <section className="glass-panel p-5">
             <p className="text-sm font-semibold text-white">Scan behavior</p>
             <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
               <li>Exact line numbers for detected insecure patterns.</li>
               <li>OWASP Top 10 mapping for each finding.</li>
-              <li>Severity-weighted security score from 0 to 100.</li>
-              <li>Patched replacement code with one-click copy support.</li>
-              <li>GitHub repository scans support explicit branch names or `/tree/&lt;branch&gt;` URLs.</li>
+              <li>Confidence-weighted security score from 0 to 100.</li>
+              <li>Patched replacement code with one-click copy support and side-by-side diff view.</li>
+              <li>GitHub repository scans run as async jobs with progress polling and cache support.</li>
             </ul>
           </section>
         </div>

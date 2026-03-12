@@ -1,0 +1,15 @@
+ai:
+  min_severity: HIGH
+
+scanner:
+  max_findings_per_file: 100
+  prefer_python_ast: true
+
+suppressions:
+  paths:
+    - "frontend/dist/*"
+    - "**/generated/*"
+  rule_ids:
+    - "weak-crypto"
+  types:
+    - "Insecure API Call"

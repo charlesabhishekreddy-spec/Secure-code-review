@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { EmptyResultsState } from "../components/EmptyResultsState";
 import { ResultsSummary } from "../components/ResultsSummary";
 import { ResultsTable } from "../components/ResultsTable";
+import { ReviewStages } from "../components/ReviewStages";
 import { useScanContext } from "../context/ScanContext";
 
 export function ResultsPage() {
@@ -17,9 +18,10 @@ export function ResultsPage() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="section-label">Results dashboard</p>
-          <h1 className="mt-4 text-3xl font-semibold text-white">Security review summary</h1>
+          <h1 className="mt-4 text-3xl font-semibold text-white">Three-stage security review summary</h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
-            Review the findings, understand the exploit path, and copy the secure replacement into your codebase.
+            Review the stage-1 statistical signals, the stage-2 Gemini validation output, and the stage-3 OWASP-based
+            score before applying the recommended fix.
           </p>
         </div>
         <Link to="/scanner" className="action-button bg-white/10 text-white hover:bg-white/15">
@@ -28,6 +30,7 @@ export function ResultsPage() {
       </div>
 
       <ResultsSummary results={results} />
+      <ReviewStages stages={results.review_stages || []} />
       <ResultsTable vulnerabilities={results.vulnerabilities} />
     </div>
   );

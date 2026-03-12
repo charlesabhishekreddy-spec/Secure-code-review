@@ -20,7 +20,7 @@ export function ResultsTable({ vulnerabilities }) {
       <div className="border-b border-white/10 px-6 py-5">
         <h2 className="text-xl font-semibold text-white">Vulnerability report</h2>
         <p className="mt-2 text-sm text-slate-300">
-          Review the finding details, then copy the patched replacement code directly from the report.
+          Each finding now includes its stage-1 signal, stage-2 AI review outcome, and stage-3 OWASP mapping.
         </p>
       </div>
       <div className="overflow-x-auto">
@@ -43,6 +43,17 @@ export function ResultsTable({ vulnerabilities }) {
                     <p className="font-semibold text-white">{item.type}</p>
                     <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{item.filename}</p>
                     <code className="block rounded-2xl bg-slate-950/50 px-3 py-2 text-xs text-slate-200">{item.snippet}</code>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
+                        {item.review_decision.replaceAll("_", " ")}
+                      </span>
+                      <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-cyan-100">
+                        Confidence {item.confidence}
+                      </span>
+                      <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
+                        {item.ai_provider}
+                      </span>
+                    </div>
                   </div>
                 </td>
                 <td className="px-6 py-5">
@@ -64,6 +75,22 @@ export function ResultsTable({ vulnerabilities }) {
                         <div>
                           <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Attack scenario</p>
                           <p className="mt-1">{item.attack_scenario}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Review pipeline</p>
+                          <div className="mt-2 space-y-2">
+                            {Object.entries(item.review_pipeline || {}).map(([stageKey, stageValue]) => (
+                              <div key={stageKey} className="rounded-2xl border border-white/10 bg-slate-950/40 p-3">
+                                <div className="flex items-center justify-between gap-3">
+                                  <p className="text-sm font-semibold text-white">{stageValue.name || stageKey}</p>
+                                  <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                                    {String(stageValue.status || "").replaceAll("_", " ")}
+                                  </span>
+                                </div>
+                                <p className="mt-2 text-sm text-slate-300">{stageValue.summary}</p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                         <div>
                           <div className="mb-2 flex items-center justify-between gap-3">

@@ -12,6 +12,8 @@ function scoreTone(score) {
 
 export function ResultsSummary({ results }) {
   const repository = results?.source?.repository;
+  const aiStage = results?.review_stages?.find((stage) => stage.id === "stage_2_gemini_ai_review");
+  const suspiciousDensity = results?.statistics?.suspicious_density ?? 0;
 
   return (
     <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
@@ -22,12 +24,12 @@ export function ResultsSummary({ results }) {
             <div>
               <h2 className="text-3xl font-semibold text-white">Risk posture for this scan</h2>
               <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">
-                CodeSentinel subtracts weighted penalties from 100 based on vulnerability severity and shows the exact
-                findings that drove the score.
+                CodeSentinel now runs a three-stage review flow and subtracts weighted penalties from 100 after OWASP
+                correlation and severity scoring.
               </p>
               <div className="mt-4 text-sm text-slate-300">
                 Source: <span className="font-semibold text-white">{results.source.filename}</span>
-                {repository ? ` • ${repository}` : ""}
+                {repository ? ` | ${repository}` : ""}
               </div>
             </div>
             <div className={`rounded-[2rem] bg-gradient-to-br ${scoreTone(results.security_score)} p-[1px]`}>
@@ -41,14 +43,16 @@ export function ResultsSummary({ results }) {
         <article className="glass-panel p-6">
           <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Total findings</p>
           <p className="mt-4 text-4xl font-black text-white">{results.total_vulnerabilities}</p>
-          <p className="mt-3 text-sm text-slate-300">Each finding includes line number, OWASP mapping, and a secure fix.</p>
+          <p className="mt-3 text-sm text-slate-300">
+            Suspicious code density: <span className="font-semibold text-white">{suspiciousDensity}%</span>
+          </p>
         </article>
         <article className="glass-panel p-6">
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Penalty applied</p>
-          <p className="mt-4 text-4xl font-black text-white">{results.total_penalty}</p>
-          <p className="mt-3 text-sm text-slate-300">
-            Current scoring weights: Critical -25, High -15, Medium -10, Low -5.
+          <p className="text-sm uppercase tracking-[0.2em] text-slate-400">AI review stage</p>
+          <p className="mt-4 text-2xl font-black text-white">
+            {aiStage?.details?.providers_used?.gemini ? "Gemini" : "Local fallback"}
           </p>
+          <p className="mt-3 text-sm text-slate-300">{aiStage?.summary || "Gemini is configured as the primary review stage."}</p>
         </article>
       </div>
       <SeverityBreakdown breakdown={results.severity_breakdown} />

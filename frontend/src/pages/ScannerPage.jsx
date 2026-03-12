@@ -101,8 +101,8 @@ export function ScannerPage() {
             <p className="section-label">Scanner workspace</p>
             <h1 className="mt-4 text-3xl font-semibold text-white">Inspect code, uploads, and GitHub repositories</h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
-              The scanner reports exact lines, mapped OWASP categories, severity, attack scenarios, and secure patched
-              replacements.
+              The scanner reports exact lines, runs a three-stage review workflow, maps findings to OWASP categories,
+              and returns secure patched replacements.
             </p>
           </div>
 

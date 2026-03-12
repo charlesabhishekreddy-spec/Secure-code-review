@@ -13,8 +13,9 @@ export function HomePage() {
               Find OWASP Top 10 vulnerabilities before they ship.
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">
-              CodeSentinel combines static analysis rules with AI-assisted remediation guidance to detect insecure code
-              patterns, report exact line numbers, explain the risk in plain English, and recommend safer replacements.
+              CodeSentinel combines stage-1 statistical pattern analysis, stage-2 Gemini validation, and stage-3
+              OWASP correlation to detect insecure code patterns, report exact line numbers, explain the risk in plain
+              English, and recommend safer replacements.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/scanner" className="action-button bg-mint text-slate-950 hover:bg-cyan-300">

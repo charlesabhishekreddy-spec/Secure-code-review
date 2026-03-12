@@ -11,6 +11,7 @@ import { detectLanguageFromFilename, filenameForLanguage, languageOptions } from
 export function ScannerPage() {
   const navigate = useNavigate();
   const [repoUrl, setRepoUrl] = useState("");
+  const [repoBranch, setRepoBranch] = useState("");
   const { editorState, setEditorState, setResults, loading, setLoading, error, setError } = useScanContext();
 
   function updateCode(nextCode) {
@@ -83,7 +84,7 @@ export function ScannerPage() {
     setError("");
 
     try {
-      const payload = await scanGitHubRepository(repoUrl.trim());
+      const payload = await scanGitHubRepository(repoUrl.trim(), repoBranch.trim());
       setResults(payload);
       navigate("/results");
     } catch (scanError) {
@@ -157,7 +158,14 @@ export function ScannerPage() {
             onClear={handleClearFile}
             disabled={loading}
           />
-          <RepositoryScanForm value={repoUrl} onChange={setRepoUrl} onSubmit={handleRepositoryScan} disabled={loading} />
+          <RepositoryScanForm
+            value={repoUrl}
+            onChange={setRepoUrl}
+            branchValue={repoBranch}
+            onBranchChange={setRepoBranch}
+            onSubmit={handleRepositoryScan}
+            disabled={loading}
+          />
           <section className="glass-panel p-5">
             <p className="text-sm font-semibold text-white">Scan behavior</p>
             <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
@@ -165,6 +173,7 @@ export function ScannerPage() {
               <li>OWASP Top 10 mapping for each finding.</li>
               <li>Severity-weighted security score from 0 to 100.</li>
               <li>Patched replacement code with one-click copy support.</li>
+              <li>GitHub repository scans support explicit branch names or `/tree/&lt;branch&gt;` URLs.</li>
             </ul>
           </section>
         </div>

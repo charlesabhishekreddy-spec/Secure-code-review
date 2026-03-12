@@ -36,13 +36,18 @@ export async function uploadCode(file) {
   return parseResponse(response);
 }
 
-export async function scanGitHubRepository(repoUrl) {
+export async function scanGitHubRepository(repoUrl, branch) {
+  const body = { repo_url: repoUrl };
+  if (branch?.trim()) {
+    body.branch = branch.trim();
+  }
+
   const response = await fetch(`${API_BASE_URL}/scan-github`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ repo_url: repoUrl })
+    body: JSON.stringify(body)
   });
 
   return parseResponse(response);

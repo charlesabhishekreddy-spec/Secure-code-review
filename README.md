@@ -84,6 +84,16 @@ set GEMINI_MODEL=gemini-2.5-flash
 - `POST /scan-github`
 - `GET /health`
 
+## GitHub Repository Scan Notes
+
+- Supported repo URL formats:
+  - `https://github.com/owner/repo`
+  - `https://github.com/owner/repo.git`
+  - `https://github.com/owner/repo/tree/main`
+- You can also provide an explicit branch in the scanner UI.
+- Repository scans ignore common build and dependency folders such as `node_modules`, `dist`, `build`, `vendor`, and `.venv`.
+- If GitHub rate-limits anonymous requests, add `GITHUB_TOKEN` to `backend/.env`.
+
 ## Response Highlights
 
 Each scan response includes:

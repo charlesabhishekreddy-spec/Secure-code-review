@@ -1,16 +1,13 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { EmptyResultsState } from "../components/EmptyResultsState";
 import { ResultsSummary } from "../components/ResultsSummary";
 import { ResultsTable } from "../components/ResultsTable";
 import { ReviewStages } from "../components/ReviewStages";
-import { ScanHistoryPanel } from "../components/ScanHistoryPanel";
 import { useScanContext } from "../context/ScanContext";
 
 export function ResultsPage() {
-  const { results, scanHistory, clearHistory, restoreHistoryEntry } = useScanContext();
-  const [selectedHistoryId, setSelectedHistoryId] = useState(scanHistory[1]?.id || "");
+  const { results } = useScanContext();
 
   if (!results) {
     return <EmptyResultsState />;
@@ -27,21 +24,18 @@ export function ResultsPage() {
             score before applying the recommended fix.
           </p>
         </div>
-        <Link to="/scanner" className="action-button bg-white/10 text-white hover:bg-white/15">
-          New scan
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link to="/history" className="action-button bg-white/10 text-white hover:bg-white/15">
+            View history
+          </Link>
+          <Link to="/scanner" className="action-button bg-white/10 text-white hover:bg-white/15">
+            New scan
+          </Link>
+        </div>
       </div>
 
       <ResultsSummary results={results} />
       <ReviewStages stages={results.review_stages || []} />
-      <ScanHistoryPanel
-        currentResults={results}
-        history={scanHistory}
-        selectedHistoryId={selectedHistoryId}
-        onSelectHistory={setSelectedHistoryId}
-        onOpenHistory={restoreHistoryEntry}
-        onClearHistory={clearHistory}
-      />
       <ResultsTable vulnerabilities={results.vulnerabilities || []} />
     </div>
   );

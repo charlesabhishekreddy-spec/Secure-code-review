@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 
 import { Navbar } from "./components/Navbar";
+import { HistoryPage } from "./pages/HistoryPage";
 import { HomePage } from "./pages/HomePage";
 import { ResultsPage } from "./pages/ResultsPage";
 import { ScannerPage } from "./pages/ScannerPage";
@@ -15,6 +16,7 @@ export default function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/scanner" element={<ScannerPage />} />
             <Route path="/results" element={<ResultsPage />} />
+            <Route path="/history" element={<HistoryPage />} />
           </Routes>
         </main>
       </div>

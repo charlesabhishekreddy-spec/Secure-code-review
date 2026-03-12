@@ -3,7 +3,8 @@ import { NavLink } from "react-router-dom";
 const links = [
   { label: "Home", to: "/" },
   { label: "Scanner", to: "/scanner" },
-  { label: "Results", to: "/results" }
+  { label: "Results", to: "/results" },
+  { label: "History", to: "/history" }
 ];
 
 export function Navbar() {

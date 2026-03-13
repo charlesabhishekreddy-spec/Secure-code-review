@@ -1,4 +1,3644 @@
 {
+  "charlesabhishekreddy-spec/Aerovanta:main": {
+    "cached_at": 1773385507.7908056,
+    "result": {
+      "average_confidence": 77.61,
+      "owasp_summary": {
+        "A01 Broken Access Control": 0,
+        "A02 Cryptographic Failures": 3,
+        "A03 Injection": 34,
+        "A04 Insecure Design": 0,
+        "A05 Security Misconfiguration": 11,
+        "A06 Vulnerable Components": 0,
+        "A07 Identification & Authentication Failures": 0,
+        "A08 Software & Data Integrity Failures": 0,
+        "A09 Logging & Monitoring Failures": 0,
+        "A10 Server Side Request Forgery": 14
+      },
+      "review_stages": [
+        {
+          "details": {
+            "average_confidence": 17.91,
+            "class_count": 1,
+            "comment_lines": 183,
+            "config_path": null,
+            "detection_methods": {
+              "javascript-flow": 47,
+              "regex": 34
+            },
+            "duration_ms": 1.48,
+            "file_count": 143,
+            "finding_types": {
+              "Cross Site Scripting (XSS)": 2,
+              "Insecure API Call": 3,
+              "SQL Injection": 32,
+              "Server-Side Request Forgery (SSRF)": 14,
+              "Unsafe File Handling": 11
+            },
+            "function_count": 1687,
+            "import_lines": 632,
+            "languages": {
+              "javascript": 142,
+              "typescript": 1
+            },
+            "non_empty_lines": 24851,
+            "suppressed_count": 0,
+            "suspicious_density": 0.25,
+            "suspicious_lines": 62,
+            "total_lines": 27464,
+            "truncated_count": 0
+          },
+          "id": "stage_1_statistical_analysis",
+          "name": "Stage 1 - Statistical Pattern Analysis",
+          "status": "completed",
+          "summary": "Scanned 143 file(s) and 24851 non-empty lines. Deterministic and AST-assisted analysis flagged 62 suspicious code path(s)."
+        },
+        {
+          "details": {
+            "batch_calls": 0,
+            "batch_size": 8,
+            "cached_reviews": 0,
+            "decision_breakdown": {
+              "needs_manual_review": 62
+            },
+            "duration_ms": 5.7,
+            "fallback_reasons": {
+              "GEMINI_API_KEY is not configured.": 24,
+              "Skipped Gemini review because project policy only sends HIGH or higher findings to the model.": 3,
+              "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).": 35
+            },
+            "max_ai_findings": 24,
+            "min_severity": "HIGH",
+            "model": "gemini-2.5-flash",
+            "primary_provider": "gemini",
+            "providers_used": {
+              "local": 62
+            },
+            "redacted_reviews": 0
+          },
+          "id": "stage_2_gemini_ai_review",
+          "name": "Stage 2 - Gemini AI Review",
+          "status": "fallback",
+          "summary": "Primary AI provider: Gemini. Reviewed 62 finding(s); 0 with Gemini or cache in 0 live batch call(s) and 62 via deterministic fallback."
+        },
+        {
+          "details": {
+            "average_confidence": 77.61,
+            "duration_ms": 1.42,
+            "owasp_summary": {
+              "A01 Broken Access Control": 0,
+              "A02 Cryptographic Failures": 3,
+              "A03 Injection": 34,
+              "A04 Insecure Design": 0,
+              "A05 Security Misconfiguration": 11,
+              "A06 Vulnerable Components": 0,
+              "A07 Identification & Authentication Failures": 0,
+              "A08 Software & Data Integrity Failures": 0,
+              "A09 Logging & Monitoring Failures": 0,
+              "A10 Server Side Request Forgery": 14
+            },
+            "security_score": 0,
+            "severity_breakdown": {
+              "CRITICAL": 0,
+              "HIGH": 59,
+              "LOW": 0,
+              "MEDIUM": 3
+            },
+            "total_penalty": 732
+          },
+          "id": "stage_3_owasp_correlation",
+          "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+          "status": "completed",
+          "summary": "Normalized 62 finding(s) across 4 OWASP category bucket(s) and calculated a final security score of 0."
+        }
+      ],
+      "security_score": 0,
+      "severity_breakdown": {
+        "CRITICAL": 0,
+        "HIGH": 59,
+        "LOW": 0,
+        "MEDIUM": 3
+      },
+      "source": {
+        "branch": "main",
+        "cache_hit": false,
+        "filename": "charlesabhishekreddy-spec/Aerovanta",
+        "language": "multi-file",
+        "repository": "https://github.com/charlesabhishekreddy-spec/Aerovanta",
+        "scanned_files": 143
+      },
+      "statistics": {
+        "average_confidence": 17.91,
+        "class_count": 1,
+        "comment_lines": 183,
+        "detection_methods": {
+          "javascript-flow": 47,
+          "regex": 34
+        },
+        "file_count": 143,
+        "function_count": 1687,
+        "import_lines": 632,
+        "languages": {
+          "javascript": 142,
+          "typescript": 1
+        },
+        "non_empty_lines": 24851,
+        "suspicious_density": 0.25,
+        "suspicious_lines": 62,
+        "total_lines": 27464
+      },
+      "total_penalty": 732,
+      "total_vulnerabilities": 62,
+      "vulnerabilities": [
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "SQL statements built from runtime values can let attackers alter the query structure.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/scripts/export-d1-seed.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 46,
+          "matched_text": "INSERT INTO app_meta (key, value_json, updated_date) VALUES (${sqlString(\"state_meta\")}, ${jsonString(meta)}",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql, sql-inline-query",
+              "status": "flagged",
+              "summary": "SQL statements built from runtime values can let attackers alter the query structure."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "sql-inline-query",
+          "rule_ids": [
+            "js-flow-sql",
+            "sql-inline-query"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input.",
+            "SQL statements built from runtime values can let attackers alter the query structure."
+          ],
+          "snippet": "`INSERT INTO app_meta (key, value_json, updated_date) VALUES (${sqlString(\"state_meta\")}, ${jsonString(meta)}, ${sqlString(",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/scripts/export-d1-seed.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 86,
+          "matched_text": "`INSERT INTO auth_events (id, email, type, created_date, metadata_json, payload_json) VALUES (${sqlString(",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "`INSERT INTO auth_events (id, email, type, created_date, metadata_json, payload_json) VALUES (${sqlString(",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/scripts/export-d1-seed.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 98,
+          "matched_text": "`INSERT INTO auth_sessions (id, token_hash, csrf_token_hash, user_id, user_email, remember, device_id, ip, created_date, last_active, expires_at, revoked_date, updated_date, payload_json) VALUES (${sqlString(",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "`INSERT INTO auth_sessions (id, token_hash, csrf_token_hash, user_id, user_email, remember, device_id, ip, created_date, last_active, expires_at, revoked_date, updated_date, payload_json) VALUES (${sqlString(",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/scripts/export-d1-seed.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 116,
+          "matched_text": "`INSERT INTO password_reset_tokens (id, user_id, token_hash, created_date, expires_at, used_at, updated_date, payload_json) VALUES (${sqlString(",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "`INSERT INTO password_reset_tokens (id, user_id, token_hash, created_date, expires_at, used_at, updated_date, payload_json) VALUES (${sqlString(",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/scripts/export-d1-seed.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 130,
+          "matched_text": "`INSERT INTO login_throttle (id, email, device_id, ip, attempts, first_attempt_at, last_attempt_at, lock_until, updated_date, payload_json) VALUES (${sqlString(",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "`INSERT INTO login_throttle (id, email, device_id, ip, attempts, first_attempt_at, last_attempt_at, lock_until, updated_date, payload_json) VALUES (${sqlString(",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/scripts/export-d1-seed.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 144,
+          "matched_text": "`INSERT INTO device_sessions (id, user_email, device_id, last_active, device_info_json, payload_json) VALUES (${sqlString(",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "`INSERT INTO device_sessions (id, user_email, device_id, last_active, device_info_json, payload_json) VALUES (${sqlString(",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/scripts/export-d1-seed.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 159,
+          "matched_text": "`INSERT INTO entity_records (entity_name, record_id, created_by, created_by_email, created_date, updated_date, payload_json) VALUES (${sqlString(",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "`INSERT INTO entity_records (entity_name, record_id, created_by, created_by_email, created_date, updated_date, payload_json) VALUES (${sqlString(",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can try `../../etc/passwd` style traversal payloads to read or overwrite files outside the intended directory.",
+          "confidence": 78,
+          "description": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The code appears to open or return files based on user-controlled path input.",
+          "filename": "Aerovanta-main/cloudflare/scripts/export-d1-seed.js",
+          "fix": "Resolve the path against a trusted base directory, normalize it, and reject anything that escapes that directory.",
+          "language": "javascript",
+          "line": 170,
+          "matched_text": "readFile(inputPath",
+          "owasp_category": "A05 Security Misconfiguration",
+          "patched_code": "const safeRoot = path.resolve(\"/srv/app/uploads\");\nconst candidate = path.resolve(safeRoot, requestedName);\nif (!candidate.startsWith(safeRoot)) {\n  throw new Error(\"Blocked path traversal\");\n}\nconst data = await fs.promises.readFile(candidate, \"utf8\");",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-file, unsafe-file-handling",
+              "status": "flagged",
+              "summary": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A05 Security Misconfiguration",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A05 Security Misconfiguration and included it in the weighted security score."
+            }
+          },
+          "rule_id": "unsafe-file-handling",
+          "rule_ids": [
+            "js-flow-file",
+            "unsafe-file-handling"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted path reaching a file system sink.",
+            "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+          ],
+          "snippet": "const raw = await readFile(inputPath, \"utf8\");",
+          "type": "Unsafe File Handling"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can try `../../etc/passwd` style traversal payloads to read or overwrite files outside the intended directory.",
+          "confidence": 78,
+          "description": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The code appears to open or return files based on user-controlled path input.",
+          "filename": "Aerovanta-main/cloudflare/scripts/export-d1-seed.js",
+          "fix": "Resolve the path against a trusted base directory, normalize it, and reject anything that escapes that directory.",
+          "language": "javascript",
+          "line": 187,
+          "matched_text": "writeFile(outputPath",
+          "owasp_category": "A05 Security Misconfiguration",
+          "patched_code": "const safeRoot = path.resolve(\"/srv/app/uploads\");\nconst candidate = path.resolve(safeRoot, requestedName);\nif (!candidate.startsWith(safeRoot)) {\n  throw new Error(\"Blocked path traversal\");\n}\nconst data = await fs.promises.readFile(candidate, \"utf8\");",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-file, unsafe-file-handling",
+              "status": "flagged",
+              "summary": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A05 Security Misconfiguration",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A05 Security Misconfiguration and included it in the weighted security score."
+            }
+          },
+          "rule_id": "unsafe-file-handling",
+          "rule_ids": [
+            "js-flow-file",
+            "unsafe-file-handling"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted path reaching a file system sink.",
+            "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+          ],
+          "snippet": "await writeFile(outputPath, lines.join(\"\\n\"), \"utf8\");",
+          "type": "Unsafe File Handling"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "SQL statements built from runtime values can let attackers alter the query structure.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/worker/src/auth.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 359,
+          "matched_text": "SELECT payload_json FROM users WHERE json_extract(payload_json, '${jsonPath}",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql, sql-inline-query",
+              "status": "flagged",
+              "summary": "SQL statements built from runtime values can let attackers alter the query structure."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "sql-inline-query",
+          "rule_ids": [
+            "js-flow-sql",
+            "sql-inline-query"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input.",
+            "SQL statements built from runtime values can let attackers alter the query structure."
+          ],
+          "snippet": "`SELECT payload_json FROM users WHERE json_extract(payload_json, '${jsonPath}') = ?1 LIMIT 1`",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/worker/src/auth.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 720,
+          "matched_text": "const row = await env.DB.prepare(\"SELECT payload_json FROM password_reset_tokens WHERE token_hash = ?1 LIMIT 1\")",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "const row = await env.DB.prepare(\"SELECT payload_json FROM password_reset_tokens WHERE token_hash = ?1 LIMIT 1\")",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/worker/src/auth.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 729,
+          "matched_text": "INSERT INTO password_reset_tokens (",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "INSERT INTO password_reset_tokens (",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/worker/src/auth.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 750,
+          "matched_text": "\"UPDATE password_reset_tokens SET used_at = ?2, updated_date = ?3, payload_json = ?4 WHERE id = ?1\"",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "\"UPDATE password_reset_tokens SET used_at = ?2, updated_date = ?3, payload_json = ?4 WHERE id = ?1\"",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/worker/src/auth.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 850,
+          "matched_text": "await env.DB.prepare(\"DELETE FROM password_reset_tokens WHERE user_id = ?1 AND (used_at IS NULL OR used_at = '')\")",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "await env.DB.prepare(\"DELETE FROM password_reset_tokens WHERE user_id = ?1 AND (used_at IS NULL OR used_at = '')\")",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/worker/src/auth.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 995,
+          "matched_text": "SELECT payload_json FROM auth_sessions",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "SELECT payload_json FROM auth_sessions",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/worker/src/auth.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 1037,
+          "matched_text": "UPDATE auth_sessions",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "UPDATE auth_sessions",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can force the server to call internal services or cloud metadata endpoints that are not public.",
+          "confidence": 78,
+          "description": "Fetching attacker-supplied URLs can expose internal services and metadata endpoints.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The server is making outbound requests to a URL that may be influenced by untrusted input.",
+          "filename": "Aerovanta-main/cloudflare/worker/src/diagnosis.js",
+          "fix": "Validate target URLs against a strict allowlist, block private address ranges, and require HTTPS.",
+          "language": "javascript",
+          "line": 505,
+          "matched_text": "fetch(OPENAI_CHAT_COMPLETIONS_URL",
+          "owasp_category": "A10 Server Side Request Forgery",
+          "patched_code": "const parsed = new URL(userSuppliedUrl);\nif (parsed.protocol !== \"https:\" || !allowlistedHosts.has(parsed.hostname)) {\n  throw new Error(\"Blocked target\");\n}\nconst response = await fetch(parsed.toString());",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-ssrf, ssrf-runtime-url",
+              "status": "flagged",
+              "summary": "Fetching attacker-supplied URLs can expose internal services and metadata endpoints."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A10 Server Side Request Forgery",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A10 Server Side Request Forgery and included it in the weighted security score."
+            }
+          },
+          "rule_id": "ssrf-runtime-url",
+          "rule_ids": [
+            "js-flow-ssrf",
+            "ssrf-runtime-url"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "Fetching attacker-supplied URLs can expose internal services and metadata endpoints.",
+            "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+          ],
+          "snippet": "const response = await fetch(OPENAI_CHAT_COMPLETIONS_URL, {",
+          "type": "Server-Side Request Forgery (SSRF)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can force the server to call internal services or cloud metadata endpoints that are not public.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a tainted URL reaching an outbound request call.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The server is making outbound requests to a URL that may be influenced by untrusted input.",
+          "filename": "Aerovanta-main/cloudflare/worker/src/diagnosis.js",
+          "fix": "Validate target URLs against a strict allowlist, block private address ranges, and require HTTPS.",
+          "language": "javascript",
+          "line": 580,
+          "matched_text": "const response = await fetch(endpoint, {",
+          "owasp_category": "A10 Server Side Request Forgery",
+          "patched_code": "const parsed = new URL(userSuppliedUrl);\nif (parsed.protocol !== \"https:\" || !allowlistedHosts.has(parsed.hostname)) {\n  throw new Error(\"Blocked target\");\n}\nconst response = await fetch(parsed.toString());",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-ssrf",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A10 Server Side Request Forgery",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A10 Server Side Request Forgery and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-ssrf",
+          "rule_ids": [
+            "js-flow-ssrf"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+          ],
+          "snippet": "const response = await fetch(endpoint, {",
+          "type": "Server-Side Request Forgery (SSRF)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/cloudflare/worker/src/diagnosis.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 657,
+          "matched_text": "\"SELECT payload_json FROM entity_records WHERE entity_name = ?1 ORDER BY updated_date DESC LIMIT 250\"",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "\"SELECT payload_json FROM entity_records WHERE entity_name = ?1 ORDER BY updated_date DESC LIMIT 250\"",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can force the server to call internal services or cloud metadata endpoints that are not public.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a tainted URL reaching an outbound request call.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The server is making outbound requests to a URL that may be influenced by untrusted input.",
+          "filename": "Aerovanta-main/cloudflare/worker/src/index.js",
+          "fix": "Validate target URLs against a strict allowlist, block private address ranges, and require HTTPS.",
+          "language": "javascript",
+          "line": 142,
+          "matched_text": "async fetch(request, env) {",
+          "owasp_category": "A10 Server Side Request Forgery",
+          "patched_code": "const parsed = new URL(userSuppliedUrl);\nif (parsed.protocol !== \"https:\" || !allowlistedHosts.has(parsed.hostname)) {\n  throw new Error(\"Blocked target\");\n}\nconst response = await fetch(parsed.toString());",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-ssrf",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A10 Server Side Request Forgery",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A10 Server Side Request Forgery and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-ssrf",
+          "rule_ids": [
+            "js-flow-ssrf"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+          ],
+          "snippet": "async fetch(request, env) {",
+          "type": "Server-Side Request Forgery (SSRF)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can force the server to call internal services or cloud metadata endpoints that are not public.",
+          "confidence": 78,
+          "description": "Fetching attacker-supplied URLs can expose internal services and metadata endpoints.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The server is making outbound requests to a URL that may be influenced by untrusted input.",
+          "filename": "Aerovanta-main/cloudflare/worker/src/llm.js",
+          "fix": "Validate target URLs against a strict allowlist, block private address ranges, and require HTTPS.",
+          "language": "javascript",
+          "line": 146,
+          "matched_text": "fetch(url",
+          "owasp_category": "A10 Server Side Request Forgery",
+          "patched_code": "const parsed = new URL(userSuppliedUrl);\nif (parsed.protocol !== \"https:\" || !allowlistedHosts.has(parsed.hostname)) {\n  throw new Error(\"Blocked target\");\n}\nconst response = await fetch(parsed.toString());",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-ssrf, ssrf-runtime-url",
+              "status": "flagged",
+              "summary": "Fetching attacker-supplied URLs can expose internal services and metadata endpoints."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A10 Server Side Request Forgery",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A10 Server Side Request Forgery and included it in the weighted security score."
+            }
+          },
+          "rule_id": "ssrf-runtime-url",
+          "rule_ids": [
+            "js-flow-ssrf",
+            "ssrf-runtime-url"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "Fetching attacker-supplied URLs can expose internal services and metadata endpoints.",
+            "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+          ],
+          "snippet": "const response = await fetch(url, { signal: controller.signal, headers });",
+          "type": "Server-Side Request Forgery (SSRF)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can force the server to call internal services or cloud metadata endpoints that are not public.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a tainted URL reaching an outbound request call.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The server is making outbound requests to a URL that may be influenced by untrusted input.",
+          "filename": "Aerovanta-main/cloudflare/worker/src/llm.js",
+          "fix": "Validate target URLs against a strict allowlist, block private address ranges, and require HTTPS.",
+          "language": "javascript",
+          "line": 439,
+          "matched_text": "const response = await fetch(endpoint, {",
+          "owasp_category": "A10 Server Side Request Forgery",
+          "patched_code": "const parsed = new URL(userSuppliedUrl);\nif (parsed.protocol !== \"https:\" || !allowlistedHosts.has(parsed.hostname)) {\n  throw new Error(\"Blocked target\");\n}\nconst response = await fetch(parsed.toString());",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-ssrf",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A10 Server Side Request Forgery",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A10 Server Side Request Forgery and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-ssrf",
+          "rule_ids": [
+            "js-flow-ssrf"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+          ],
+          "snippet": "const response = await fetch(endpoint, {",
+          "type": "Server-Side Request Forgery (SSRF)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can force the server to call internal services or cloud metadata endpoints that are not public.",
+          "confidence": 78,
+          "description": "Fetching attacker-supplied URLs can expose internal services and metadata endpoints.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The server is making outbound requests to a URL that may be influenced by untrusted input.",
+          "filename": "Aerovanta-main/cloudflare/worker/src/social.js",
+          "fix": "Validate target URLs against a strict allowlist, block private address ranges, and require HTTPS.",
+          "language": "javascript",
+          "line": 73,
+          "matched_text": "fetch(url",
+          "owasp_category": "A10 Server Side Request Forgery",
+          "patched_code": "const parsed = new URL(userSuppliedUrl);\nif (parsed.protocol !== \"https:\" || !allowlistedHosts.has(parsed.hostname)) {\n  throw new Error(\"Blocked target\");\n}\nconst response = await fetch(parsed.toString());",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-ssrf, ssrf-runtime-url",
+              "status": "flagged",
+              "summary": "Fetching attacker-supplied URLs can expose internal services and metadata endpoints."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A10 Server Side Request Forgery",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A10 Server Side Request Forgery and included it in the weighted security score."
+            }
+          },
+          "rule_id": "ssrf-runtime-url",
+          "rule_ids": [
+            "js-flow-ssrf",
+            "ssrf-runtime-url"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "Fetching attacker-supplied URLs can expose internal services and metadata endpoints.",
+            "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+          ],
+          "snippet": "response = await fetch(url, init);",
+          "type": "Server-Side Request Forgery (SSRF)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can try `../../etc/passwd` style traversal payloads to read or overwrite files outside the intended directory.",
+          "confidence": 78,
+          "description": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The code appears to open or return files based on user-controlled path input.",
+          "filename": "Aerovanta-main/server/index.js",
+          "fix": "Resolve the path against a trusted base directory, normalize it, and reject anything that escapes that directory.",
+          "language": "javascript",
+          "line": 27,
+          "matched_text": "readFileSync(filePath",
+          "owasp_category": "A05 Security Misconfiguration",
+          "patched_code": "const safeRoot = path.resolve(\"/srv/app/uploads\");\nconst candidate = path.resolve(safeRoot, requestedName);\nif (!candidate.startsWith(safeRoot)) {\n  throw new Error(\"Blocked path traversal\");\n}\nconst data = await fs.promises.readFile(candidate, \"utf8\");",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-file, unsafe-file-handling",
+              "status": "flagged",
+              "summary": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A05 Security Misconfiguration",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A05 Security Misconfiguration and included it in the weighted security score."
+            }
+          },
+          "rule_id": "unsafe-file-handling",
+          "rule_ids": [
+            "js-flow-file",
+            "unsafe-file-handling"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted path reaching a file system sink.",
+            "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+          ],
+          "snippet": "const content = readFileSync(filePath, \"utf8\");",
+          "type": "Unsafe File Handling"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can try `../../etc/passwd` style traversal payloads to read or overwrite files outside the intended directory.",
+          "confidence": 78,
+          "description": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The code appears to open or return files based on user-controlled path input.",
+          "filename": "Aerovanta-main/server/index.js",
+          "fix": "Resolve the path against a trusted base directory, normalize it, and reject anything that escapes that directory.",
+          "language": "javascript",
+          "line": 73,
+          "matched_text": "readFile(config.tls.keyPath), readFile(config.tls.certPath",
+          "owasp_category": "A05 Security Misconfiguration",
+          "patched_code": "const safeRoot = path.resolve(\"/srv/app/uploads\");\nconst candidate = path.resolve(safeRoot, requestedName);\nif (!candidate.startsWith(safeRoot)) {\n  throw new Error(\"Blocked path traversal\");\n}\nconst data = await fs.promises.readFile(candidate, \"utf8\");",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-file, unsafe-file-handling",
+              "status": "flagged",
+              "summary": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A05 Security Misconfiguration",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A05 Security Misconfiguration and included it in the weighted security score."
+            }
+          },
+          "rule_id": "unsafe-file-handling",
+          "rule_ids": [
+            "js-flow-file",
+            "unsafe-file-handling"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted path reaching a file system sink.",
+            "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+          ],
+          "snippet": "const [key, cert] = await Promise.all([readFile(config.tls.keyPath), readFile(config.tls.certPath)]);",
+          "type": "Unsafe File Handling"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can try `../../etc/passwd` style traversal payloads to read or overwrite files outside the intended directory.",
+          "confidence": 78,
+          "description": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The code appears to open or return files based on user-controlled path input.",
+          "filename": "Aerovanta-main/server/scripts/check-config.js",
+          "fix": "Resolve the path against a trusted base directory, normalize it, and reject anything that escapes that directory.",
+          "language": "javascript",
+          "line": 23,
+          "matched_text": "readFileSync(filePath",
+          "owasp_category": "A05 Security Misconfiguration",
+          "patched_code": "const safeRoot = path.resolve(\"/srv/app/uploads\");\nconst candidate = path.resolve(safeRoot, requestedName);\nif (!candidate.startsWith(safeRoot)) {\n  throw new Error(\"Blocked path traversal\");\n}\nconst data = await fs.promises.readFile(candidate, \"utf8\");",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-file, unsafe-file-handling",
+              "status": "flagged",
+              "summary": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A05 Security Misconfiguration",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A05 Security Misconfiguration and included it in the weighted security score."
+            }
+          },
+          "rule_id": "unsafe-file-handling",
+          "rule_ids": [
+            "js-flow-file",
+            "unsafe-file-handling"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted path reaching a file system sink.",
+            "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+          ],
+          "snippet": "const content = readFileSync(filePath, \"utf8\");",
+          "type": "Unsafe File Handling"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can try `../../etc/passwd` style traversal payloads to read or overwrite files outside the intended directory.",
+          "confidence": 78,
+          "description": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The code appears to open or return files based on user-controlled path input.",
+          "filename": "Aerovanta-main/server/src/app.js",
+          "fix": "Resolve the path against a trusted base directory, normalize it, and reject anything that escapes that directory.",
+          "language": "javascript",
+          "line": 889,
+          "matched_text": "readFile(filePath",
+          "owasp_category": "A05 Security Misconfiguration",
+          "patched_code": "const safeRoot = path.resolve(\"/srv/app/uploads\");\nconst candidate = path.resolve(safeRoot, requestedName);\nif (!candidate.startsWith(safeRoot)) {\n  throw new Error(\"Blocked path traversal\");\n}\nconst data = await fs.promises.readFile(candidate, \"utf8\");",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-file, unsafe-file-handling",
+              "status": "flagged",
+              "summary": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A05 Security Misconfiguration",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A05 Security Misconfiguration and included it in the weighted security score."
+            }
+          },
+          "rule_id": "unsafe-file-handling",
+          "rule_ids": [
+            "js-flow-file",
+            "unsafe-file-handling"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted path reaching a file system sink.",
+            "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+          ],
+          "snippet": "const content = await readFile(filePath);",
+          "type": "Unsafe File Handling"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can try `../../etc/passwd` style traversal payloads to read or overwrite files outside the intended directory.",
+          "confidence": 78,
+          "description": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The code appears to open or return files based on user-controlled path input.",
+          "filename": "Aerovanta-main/server/src/app.js",
+          "fix": "Resolve the path against a trusted base directory, normalize it, and reject anything that escapes that directory.",
+          "language": "javascript",
+          "line": 1726,
+          "matched_text": "writeFile(absolutePath",
+          "owasp_category": "A05 Security Misconfiguration",
+          "patched_code": "const safeRoot = path.resolve(\"/srv/app/uploads\");\nconst candidate = path.resolve(safeRoot, requestedName);\nif (!candidate.startsWith(safeRoot)) {\n  throw new Error(\"Blocked path traversal\");\n}\nconst data = await fs.promises.readFile(candidate, \"utf8\");",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-file, unsafe-file-handling",
+              "status": "flagged",
+              "summary": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A05 Security Misconfiguration",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A05 Security Misconfiguration and included it in the weighted security score."
+            }
+          },
+          "rule_id": "unsafe-file-handling",
+          "rule_ids": [
+            "js-flow-file",
+            "unsafe-file-handling"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted path reaching a file system sink.",
+            "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+          ],
+          "snippet": "await writeFile(absolutePath, buffer);",
+          "type": "Unsafe File Handling"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/server/src/app.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 1812,
+          "matched_text": "if (segments.length === 3 && (method === \"PATCH\" || method === \"DELETE\")) {",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "if (segments.length === 3 && (method === \"PATCH\" || method === \"DELETE\")) {",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "Anyone positioned on the network path can read or tamper with the request and response data.",
+          "confidence": 70,
+          "description": "Plain HTTP exposes credentials and payloads to interception and tampering.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The code is calling an HTTP endpoint without transport encryption.",
+          "filename": "Aerovanta-main/server/src/config.js",
+          "fix": "Switch the endpoint to HTTPS and enforce TLS validation on the client.",
+          "language": "javascript",
+          "line": 4,
+          "matched_text": "http://localhost:5173",
+          "owasp_category": "A02 Cryptographic Failures",
+          "patched_code": "const response = await fetch(\"https://api.example.com/v1/users\");",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 76,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "insecure-http",
+              "status": "flagged",
+              "summary": "Plain HTTP exposes credentials and payloads to interception and tampering."
+            },
+            "stage_2": {
+              "confidence": 70,
+              "fallback_reason": "Skipped Gemini review because project policy only sends HIGH or higher findings to the model.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A02 Cryptographic Failures",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A02 Cryptographic Failures and included it in the weighted security score."
+            }
+          },
+          "rule_id": "insecure-http",
+          "rule_ids": [
+            "insecure-http"
+          ],
+          "severity": "MEDIUM",
+          "signals": [
+            "Plain HTTP exposes credentials and payloads to interception and tampering."
+          ],
+          "snippet": "const DEFAULT_ALLOWED_ORIGINS = [\"http://localhost:5173\", \"http://127.0.0.1:5173\"];",
+          "type": "Insecure API Call"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can try `../../etc/passwd` style traversal payloads to read or overwrite files outside the intended directory.",
+          "confidence": 78,
+          "description": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The code appears to open or return files based on user-controlled path input.",
+          "filename": "Aerovanta-main/server/src/database.js",
+          "fix": "Resolve the path against a trusted base directory, normalize it, and reject anything that escapes that directory.",
+          "language": "javascript",
+          "line": 155,
+          "matched_text": "writeFile(tmpPath",
+          "owasp_category": "A05 Security Misconfiguration",
+          "patched_code": "const safeRoot = path.resolve(\"/srv/app/uploads\");\nconst candidate = path.resolve(safeRoot, requestedName);\nif (!candidate.startsWith(safeRoot)) {\n  throw new Error(\"Blocked path traversal\");\n}\nconst data = await fs.promises.readFile(candidate, \"utf8\");",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-file, unsafe-file-handling",
+              "status": "flagged",
+              "summary": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A05 Security Misconfiguration",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A05 Security Misconfiguration and included it in the weighted security score."
+            }
+          },
+          "rule_id": "unsafe-file-handling",
+          "rule_ids": [
+            "js-flow-file",
+            "unsafe-file-handling"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted path reaching a file system sink.",
+            "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+          ],
+          "snippet": "await writeFile(tmpPath, content, \"utf8\");",
+          "type": "Unsafe File Handling"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can try `../../etc/passwd` style traversal payloads to read or overwrite files outside the intended directory.",
+          "confidence": 78,
+          "description": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The code appears to open or return files based on user-controlled path input.",
+          "filename": "Aerovanta-main/server/src/database.js",
+          "fix": "Resolve the path against a trusted base directory, normalize it, and reject anything that escapes that directory.",
+          "language": "javascript",
+          "line": 171,
+          "matched_text": "readFile(this.filePath",
+          "owasp_category": "A05 Security Misconfiguration",
+          "patched_code": "const safeRoot = path.resolve(\"/srv/app/uploads\");\nconst candidate = path.resolve(safeRoot, requestedName);\nif (!candidate.startsWith(safeRoot)) {\n  throw new Error(\"Blocked path traversal\");\n}\nconst data = await fs.promises.readFile(candidate, \"utf8\");",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-file, unsafe-file-handling",
+              "status": "flagged",
+              "summary": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A05 Security Misconfiguration",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A05 Security Misconfiguration and included it in the weighted security score."
+            }
+          },
+          "rule_id": "unsafe-file-handling",
+          "rule_ids": [
+            "js-flow-file",
+            "unsafe-file-handling"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted path reaching a file system sink.",
+            "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+          ],
+          "snippet": "const raw = await readFile(this.filePath, \"utf8\");",
+          "type": "Unsafe File Handling"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can try `../../etc/passwd` style traversal payloads to read or overwrite files outside the intended directory.",
+          "confidence": 78,
+          "description": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The code appears to open or return files based on user-controlled path input.",
+          "filename": "Aerovanta-main/server/src/diagnosis.js",
+          "fix": "Resolve the path against a trusted base directory, normalize it, and reject anything that escapes that directory.",
+          "language": "javascript",
+          "line": 124,
+          "matched_text": "readFile(absolutePath",
+          "owasp_category": "A05 Security Misconfiguration",
+          "patched_code": "const safeRoot = path.resolve(\"/srv/app/uploads\");\nconst candidate = path.resolve(safeRoot, requestedName);\nif (!candidate.startsWith(safeRoot)) {\n  throw new Error(\"Blocked path traversal\");\n}\nconst data = await fs.promises.readFile(candidate, \"utf8\");",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-file, unsafe-file-handling",
+              "status": "flagged",
+              "summary": "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A05 Security Misconfiguration",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A05 Security Misconfiguration and included it in the weighted security score."
+            }
+          },
+          "rule_id": "unsafe-file-handling",
+          "rule_ids": [
+            "js-flow-file",
+            "unsafe-file-handling"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted path reaching a file system sink.",
+            "Using attacker-controlled paths can lead to traversal, overwrite, or disclosure issues."
+          ],
+          "snippet": "const buffer = await readFile(absolutePath);",
+          "type": "Unsafe File Handling"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can force the server to call internal services or cloud metadata endpoints that are not public.",
+          "confidence": 78,
+          "description": "Fetching attacker-supplied URLs can expose internal services and metadata endpoints.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The server is making outbound requests to a URL that may be influenced by untrusted input.",
+          "filename": "Aerovanta-main/server/src/diagnosis.js",
+          "fix": "Validate target URLs against a strict allowlist, block private address ranges, and require HTTPS.",
+          "language": "javascript",
+          "line": 498,
+          "matched_text": "fetch(OPENAI_CHAT_COMPLETIONS_URL",
+          "owasp_category": "A10 Server Side Request Forgery",
+          "patched_code": "const parsed = new URL(userSuppliedUrl);\nif (parsed.protocol !== \"https:\" || !allowlistedHosts.has(parsed.hostname)) {\n  throw new Error(\"Blocked target\");\n}\nconst response = await fetch(parsed.toString());",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-ssrf, ssrf-runtime-url",
+              "status": "flagged",
+              "summary": "Fetching attacker-supplied URLs can expose internal services and metadata endpoints."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A10 Server Side Request Forgery",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A10 Server Side Request Forgery and included it in the weighted security score."
+            }
+          },
+          "rule_id": "ssrf-runtime-url",
+          "rule_ids": [
+            "js-flow-ssrf",
+            "ssrf-runtime-url"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "Fetching attacker-supplied URLs can expose internal services and metadata endpoints.",
+            "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+          ],
+          "snippet": "const response = await fetch(OPENAI_CHAT_COMPLETIONS_URL, {",
+          "type": "Server-Side Request Forgery (SSRF)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can force the server to call internal services or cloud metadata endpoints that are not public.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a tainted URL reaching an outbound request call.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The server is making outbound requests to a URL that may be influenced by untrusted input.",
+          "filename": "Aerovanta-main/server/src/diagnosis.js",
+          "fix": "Validate target URLs against a strict allowlist, block private address ranges, and require HTTPS.",
+          "language": "javascript",
+          "line": 579,
+          "matched_text": "const response = await fetch(endpoint, {",
+          "owasp_category": "A10 Server Side Request Forgery",
+          "patched_code": "const parsed = new URL(userSuppliedUrl);\nif (parsed.protocol !== \"https:\" || !allowlistedHosts.has(parsed.hostname)) {\n  throw new Error(\"Blocked target\");\n}\nconst response = await fetch(parsed.toString());",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-ssrf",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A10 Server Side Request Forgery",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A10 Server Side Request Forgery and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-ssrf",
+          "rule_ids": [
+            "js-flow-ssrf"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+          ],
+          "snippet": "const response = await fetch(endpoint, {",
+          "type": "Server-Side Request Forgery (SSRF)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can force the server to call internal services or cloud metadata endpoints that are not public.",
+          "confidence": 78,
+          "description": "Fetching attacker-supplied URLs can expose internal services and metadata endpoints.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The server is making outbound requests to a URL that may be influenced by untrusted input.",
+          "filename": "Aerovanta-main/server/src/llm.js",
+          "fix": "Validate target URLs against a strict allowlist, block private address ranges, and require HTTPS.",
+          "language": "javascript",
+          "line": 54,
+          "matched_text": "fetch(url",
+          "owasp_category": "A10 Server Side Request Forgery",
+          "patched_code": "const parsed = new URL(userSuppliedUrl);\nif (parsed.protocol !== \"https:\" || !allowlistedHosts.has(parsed.hostname)) {\n  throw new Error(\"Blocked target\");\n}\nconst response = await fetch(parsed.toString());",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-ssrf, ssrf-runtime-url",
+              "status": "flagged",
+              "summary": "Fetching attacker-supplied URLs can expose internal services and metadata endpoints."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A10 Server Side Request Forgery",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A10 Server Side Request Forgery and included it in the weighted security score."
+            }
+          },
+          "rule_id": "ssrf-runtime-url",
+          "rule_ids": [
+            "js-flow-ssrf",
+            "ssrf-runtime-url"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "Fetching attacker-supplied URLs can expose internal services and metadata endpoints.",
+            "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+          ],
+          "snippet": "const r = await fetch(url, { signal: c.signal, headers });",
+          "type": "Server-Side Request Forgery (SSRF)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can try `../../etc/passwd` style traversal payloads to read or overwrite files outside the intended directory.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a tainted path reaching a file system sink.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The code appears to open or return files based on user-controlled path input.",
+          "filename": "Aerovanta-main/server/src/llm.js",
+          "fix": "Resolve the path against a trusted base directory, normalize it, and reject anything that escapes that directory.",
+          "language": "javascript",
+          "line": 1064,
+          "matched_text": "const buffer = await readFile(absolute);",
+          "owasp_category": "A05 Security Misconfiguration",
+          "patched_code": "const safeRoot = path.resolve(\"/srv/app/uploads\");\nconst candidate = path.resolve(safeRoot, requestedName);\nif (!candidate.startsWith(safeRoot)) {\n  throw new Error(\"Blocked path traversal\");\n}\nconst data = await fs.promises.readFile(candidate, \"utf8\");",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-file",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a tainted path reaching a file system sink."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A05 Security Misconfiguration",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A05 Security Misconfiguration and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-file",
+          "rule_ids": [
+            "js-flow-file"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted path reaching a file system sink."
+          ],
+          "snippet": "const buffer = await readFile(absolute);",
+          "type": "Unsafe File Handling"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can force the server to call internal services or cloud metadata endpoints that are not public.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a tainted URL reaching an outbound request call.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The server is making outbound requests to a URL that may be influenced by untrusted input.",
+          "filename": "Aerovanta-main/server/src/llm.js",
+          "fix": "Validate target URLs against a strict allowlist, block private address ranges, and require HTTPS.",
+          "language": "javascript",
+          "line": 1151,
+          "matched_text": "const response = await fetch(\"https://api.openai.com/v1/chat/completions\", {",
+          "owasp_category": "A10 Server Side Request Forgery",
+          "patched_code": "const parsed = new URL(userSuppliedUrl);\nif (parsed.protocol !== \"https:\" || !allowlistedHosts.has(parsed.hostname)) {\n  throw new Error(\"Blocked target\");\n}\nconst response = await fetch(parsed.toString());",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-ssrf",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A10 Server Side Request Forgery",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A10 Server Side Request Forgery and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-ssrf",
+          "rule_ids": [
+            "js-flow-ssrf"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+          ],
+          "snippet": "const response = await fetch(\"https://api.openai.com/v1/chat/completions\", {",
+          "type": "Server-Side Request Forgery (SSRF)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can force the server to call internal services or cloud metadata endpoints that are not public.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a tainted URL reaching an outbound request call.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The server is making outbound requests to a URL that may be influenced by untrusted input.",
+          "filename": "Aerovanta-main/server/src/llm.js",
+          "fix": "Validate target URLs against a strict allowlist, block private address ranges, and require HTTPS.",
+          "language": "javascript",
+          "line": 1210,
+          "matched_text": "const response = await fetch(endpoint, {",
+          "owasp_category": "A10 Server Side Request Forgery",
+          "patched_code": "const parsed = new URL(userSuppliedUrl);\nif (parsed.protocol !== \"https:\" || !allowlistedHosts.has(parsed.hostname)) {\n  throw new Error(\"Blocked target\");\n}\nconst response = await fetch(parsed.toString());",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-ssrf",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A10 Server Side Request Forgery",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A10 Server Side Request Forgery and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-ssrf",
+          "rule_ids": [
+            "js-flow-ssrf"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+          ],
+          "snippet": "const response = await fetch(endpoint, {",
+          "type": "Server-Side Request Forgery (SSRF)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/server/src/llm.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 1264,
+          "matched_text": "hash: crypto.createHash(\"sha256\").update(primary.buffer).digest(\"hex\"),",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "hash: crypto.createHash(\"sha256\").update(primary.buffer).digest(\"hex\"),",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can force the server to call internal services or cloud metadata endpoints that are not public.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a tainted URL reaching an outbound request call.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The server is making outbound requests to a URL that may be influenced by untrusted input.",
+          "filename": "Aerovanta-main/src/api/appClient.js",
+          "fix": "Validate target URLs against a strict allowlist, block private address ranges, and require HTTPS.",
+          "language": "javascript",
+          "line": 136,
+          "matched_text": "response = await fetch(`${API_BASE}${path}`, {",
+          "owasp_category": "A10 Server Side Request Forgery",
+          "patched_code": "const parsed = new URL(userSuppliedUrl);\nif (parsed.protocol !== \"https:\" || !allowlistedHosts.has(parsed.hostname)) {\n  throw new Error(\"Blocked target\");\n}\nconst response = await fetch(parsed.toString());",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-ssrf",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A10 Server Side Request Forgery",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A10 Server Side Request Forgery and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-ssrf",
+          "rule_ids": [
+            "js-flow-ssrf"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+          ],
+          "snippet": "response = await fetch(`${API_BASE}${path}`, {",
+          "type": "Server-Side Request Forgery (SSRF)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "SQL statements built from runtime values can let attackers alter the query structure.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/components/diagnose/TreatmentRecommendations.jsx",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 442,
+          "matched_text": "update(treatment.id, { is_favorite: true }",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "sql-inline-query",
+              "status": "flagged",
+              "summary": "SQL statements built from runtime values can let attackers alter the query structure."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "sql-inline-query",
+          "rule_ids": [
+            "sql-inline-query"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "SQL statements built from runtime values can let attackers alter the query structure."
+          ],
+          "snippet": "await appClient.entities.Treatment.update(treatment.id, { is_favorite: true });",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "SQL statements built from runtime values can let attackers alter the query structure.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/components/pestidentifier/LinkedTreatments.jsx",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 23,
+          "matched_text": "update(id, { is_favorite: !isFavorite }",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "sql-inline-query",
+              "status": "flagged",
+              "summary": "SQL statements built from runtime values can let attackers alter the query structure."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "sql-inline-query",
+          "rule_ids": [
+            "sql-inline-query"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "SQL statements built from runtime values can let attackers alter the query structure."
+          ],
+          "snippet": "appClient.entities.Treatment.update(id, { is_favorite: !isFavorite }),",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "SQL statements built from runtime values can let attackers alter the query structure.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/components/profile/TreatmentHistory.jsx",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 18,
+          "matched_text": "update(id, { is_favorite: !isFavorite }",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "sql-inline-query",
+              "status": "flagged",
+              "summary": "SQL statements built from runtime values can let attackers alter the query structure."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "sql-inline-query",
+          "rule_ids": [
+            "sql-inline-query"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "SQL statements built from runtime values can let attackers alter the query structure."
+          ],
+          "snippet": "appClient.entities.Treatment.update(id, { is_favorite: !isFavorite }),",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "A malicious payload such as `<script>fetch('/session')</script>` can run in another user's browser and steal data.",
+          "confidence": 78,
+          "description": "Rendering unsanitized HTML lets attackers execute JavaScript in a victim's browser.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The application is rendering untrusted content as HTML or scriptable DOM content.",
+          "filename": "Aerovanta-main/src/components/ui/chart.jsx",
+          "fix": "Render untrusted content as text, or sanitize HTML with a trusted library before injecting it into the page.",
+          "language": "javascript",
+          "line": 61,
+          "matched_text": "dangerouslySetInnerHTML",
+          "owasp_category": "A03 Injection",
+          "patched_code": "<div>{userContent}</div>\n\n// or for raw DOM access\nelement.textContent = userContent;",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "xss-dangerous-html",
+              "status": "flagged",
+              "summary": "Rendering unsanitized HTML lets attackers execute JavaScript in a victim's browser."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "xss-dangerous-html",
+          "rule_ids": [
+            "xss-dangerous-html"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "Rendering unsanitized HTML lets attackers execute JavaScript in a victim's browser."
+          ],
+          "snippet": "dangerouslySetInnerHTML={{",
+          "type": "Cross Site Scripting (XSS)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/lib/VisualEditAgent.jsx",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 435,
+          "matched_text": "console.warn('[Agent] Invalid update-classes message:', message);",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "console.warn('[Agent] Invalid update-classes message:', message);",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/lib/VisualEditAgent.jsx",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 454,
+          "matched_text": "console.warn('[Agent] Invalid update-content message:', message);",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "console.warn('[Agent] Invalid update-content message:', message);",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a SQL string constructed from runtime input.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/lib/app-params.js",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 21,
+          "matched_text": "urlParams.delete(paramName);",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a SQL string constructed from runtime input."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-sql",
+          "rule_ids": [
+            "js-flow-sql"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input."
+          ],
+          "snippet": "urlParams.delete(paramName);",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "A malicious payload such as `<script>fetch('/session')</script>` can run in another user's browser and steal data.",
+          "confidence": 78,
+          "description": "Rendering unsanitized HTML lets attackers execute JavaScript in a victim's browser.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The application is rendering untrusted content as HTML or scriptable DOM content.",
+          "filename": "Aerovanta-main/src/main.jsx",
+          "fix": "Render untrusted content as text, or sanitize HTML with a trusted library before injecting it into the page.",
+          "language": "javascript",
+          "line": 31,
+          "matched_text": "innerHTML =",
+          "owasp_category": "A03 Injection",
+          "patched_code": "<div>{userContent}</div>\n\n// or for raw DOM access\nelement.textContent = userContent;",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "xss-dangerous-html",
+              "status": "flagged",
+              "summary": "Rendering unsanitized HTML lets attackers execute JavaScript in a victim's browser."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "xss-dangerous-html",
+          "rule_ids": [
+            "xss-dangerous-html"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "Rendering unsanitized HTML lets attackers execute JavaScript in a victim's browser."
+          ],
+          "snippet": "rootElement.innerHTML = '<div style=\"min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;color:#334155;\">Completing Microsoft sign-in...</div>'",
+          "type": "Cross Site Scripting (XSS)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can force the server to call internal services or cloud metadata endpoints that are not public.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a tainted URL reaching an outbound request call.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The server is making outbound requests to a URL that may be influenced by untrusted input.",
+          "filename": "Aerovanta-main/src/pages/Admin.jsx",
+          "fix": "Validate target URLs against a strict allowlist, block private address ranges, and require HTTPS.",
+          "language": "javascript",
+          "line": 116,
+          "matched_text": "<Button className=\"bg-violet-600 hover:bg-violet-700\" onClick={() => currentUserQuery.refetch()}>",
+          "owasp_category": "A10 Server Side Request Forgery",
+          "patched_code": "const parsed = new URL(userSuppliedUrl);\nif (parsed.protocol !== \"https:\" || !allowlistedHosts.has(parsed.hostname)) {\n  throw new Error(\"Blocked target\");\n}\nconst response = await fetch(parsed.toString());",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-ssrf",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A10 Server Side Request Forgery",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A10 Server Side Request Forgery and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-ssrf",
+          "rule_ids": [
+            "js-flow-ssrf"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+          ],
+          "snippet": "<Button className=\"bg-violet-600 hover:bg-violet-700\" onClick={() => currentUserQuery.refetch()}>",
+          "type": "Server-Side Request Forgery (SSRF)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "SQL statements built from runtime values can let attackers alter the query structure.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/pages/Community.jsx",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 286,
+          "matched_text": "Select value={sortBy} onValueChange={setSortBy}",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "sql-inline-query",
+              "status": "flagged",
+              "summary": "SQL statements built from runtime values can let attackers alter the query structure."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "sql-inline-query",
+          "rule_ids": [
+            "sql-inline-query"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "SQL statements built from runtime values can let attackers alter the query structure."
+          ],
+          "snippet": "<Select value={sortBy} onValueChange={setSortBy}>",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can force the server to call internal services or cloud metadata endpoints that are not public.",
+          "confidence": 78,
+          "description": "JavaScript flow analysis found a tainted URL reaching an outbound request call.",
+          "detection_method": "javascript-flow",
+          "detection_methods": [
+            "javascript-flow"
+          ],
+          "explanation": "The server is making outbound requests to a URL that may be influenced by untrusted input.",
+          "filename": "Aerovanta-main/src/pages/Dashboard.jsx",
+          "fix": "Validate target URLs against a strict allowlist, block private address ranges, and require HTTPS.",
+          "language": "javascript",
+          "line": 152,
+          "matched_text": "<Button variant=\"outline\" className=\"gap-2\" onClick={() => diagnosesQuery.refetch()}>",
+          "owasp_category": "A10 Server Side Request Forgery",
+          "patched_code": "const parsed = new URL(userSuppliedUrl);\nif (parsed.protocol !== \"https:\" || !allowlistedHosts.has(parsed.hostname)) {\n  throw new Error(\"Blocked target\");\n}\nconst response = await fetch(parsed.toString());",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "javascript-flow"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-ssrf",
+              "status": "flagged",
+              "summary": "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A10 Server Side Request Forgery",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A10 Server Side Request Forgery and included it in the weighted security score."
+            }
+          },
+          "rule_id": "js-flow-ssrf",
+          "rule_ids": [
+            "js-flow-ssrf"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a tainted URL reaching an outbound request call."
+          ],
+          "snippet": "<Button variant=\"outline\" className=\"gap-2\" onClick={() => diagnosesQuery.refetch()}>",
+          "type": "Server-Side Request Forgery (SSRF)"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "SQL statements built from runtime values can let attackers alter the query structure.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/pages/Dashboard.jsx",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 182,
+          "matched_text": "Select value={severityFilter} onValueChange={setSeverityFilter}",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "sql-inline-query",
+              "status": "flagged",
+              "summary": "SQL statements built from runtime values can let attackers alter the query structure."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "sql-inline-query",
+          "rule_ids": [
+            "sql-inline-query"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "SQL statements built from runtime values can let attackers alter the query structure."
+          ],
+          "snippet": "<Select value={severityFilter} onValueChange={setSeverityFilter}>",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "SQL statements built from runtime values can let attackers alter the query structure.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/pages/Dashboard.jsx",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 194,
+          "matched_text": "Select value={statusFilter} onValueChange={setStatusFilter}",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "sql-inline-query",
+              "status": "flagged",
+              "summary": "SQL statements built from runtime values can let attackers alter the query structure."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "sql-inline-query",
+          "rule_ids": [
+            "sql-inline-query"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "SQL statements built from runtime values can let attackers alter the query structure."
+          ],
+          "snippet": "<Select value={statusFilter} onValueChange={setStatusFilter}>",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "SQL statements built from runtime values can let attackers alter the query structure.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/pages/Planner.jsx",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 395,
+          "matched_text": "update(id, { status }",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "sql-inline-query",
+              "status": "flagged",
+              "summary": "SQL statements built from runtime values can let attackers alter the query structure."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "sql-inline-query",
+          "rule_ids": [
+            "sql-inline-query"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "SQL statements built from runtime values can let attackers alter the query structure."
+          ],
+          "snippet": "await appClient.entities.CropPlan.update(id, { status });",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "SQL statements built from runtime values can let attackers alter the query structure.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/pages/Planner.jsx",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 407,
+          "matched_text": "Delete \"${plan?.crop_name || \"this plan\"}",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql, sql-inline-query",
+              "status": "flagged",
+              "summary": "SQL statements built from runtime values can let attackers alter the query structure."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "sql-inline-query",
+          "rule_ids": [
+            "js-flow-sql",
+            "sql-inline-query"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input.",
+            "SQL statements built from runtime values can let attackers alter the query structure."
+          ],
+          "snippet": "const ok = window.confirm(`Delete \"${plan?.crop_name || \"this plan\"}\"? This action cannot be undone.`);",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "SQL statements built from runtime values can let attackers alter the query structure.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/pages/Planner.jsx",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 502,
+          "matched_text": "Select value={soilType} onValueChange={setSoilType}",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "sql-inline-query",
+              "status": "flagged",
+              "summary": "SQL statements built from runtime values can let attackers alter the query structure."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "sql-inline-query",
+          "rule_ids": [
+            "sql-inline-query"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "SQL statements built from runtime values can let attackers alter the query structure."
+          ],
+          "snippet": "<Select value={soilType} onValueChange={setSoilType}>",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "SQL statements built from runtime values can let attackers alter the query structure.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/pages/Predictions.jsx",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 47,
+          "matched_text": "update(id, { user_dismissed: true }",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "sql-inline-query",
+              "status": "flagged",
+              "summary": "SQL statements built from runtime values can let attackers alter the query structure."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "Skipped Gemini review to keep scan latency bounded to the top 24 finding(s).",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "sql-inline-query",
+          "rule_ids": [
+            "sql-inline-query"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "SQL statements built from runtime values can let attackers alter the query structure."
+          ],
+          "snippet": "mutationFn: (id) => appClient.entities.PestPrediction.update(id, { user_dismissed: true }),",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "SQL statements built from runtime values can let attackers alter the query structure.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "javascript-flow",
+            "regex"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/pages/Schedule.jsx",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 171,
+          "matched_text": "Delete task \"${task.title}",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 92,
+              "detection_methods": [
+                "javascript-flow",
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "js-flow-sql, sql-inline-query",
+              "status": "flagged",
+              "summary": "SQL statements built from runtime values can let attackers alter the query structure."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "sql-inline-query",
+          "rule_ids": [
+            "js-flow-sql",
+            "sql-inline-query"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "JavaScript flow analysis found a SQL string constructed from runtime input.",
+            "SQL statements built from runtime values can let attackers alter the query structure."
+          ],
+          "snippet": "const confirmed = window.confirm(`Delete task \"${task.title}\"? This action cannot be undone.`);",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "An attacker can submit a value like `1 OR 1=1` and change which rows are returned or even modify data.",
+          "confidence": 78,
+          "description": "SQL statements built from runtime values can let attackers alter the query structure.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The application is stitching data into a SQL statement instead of sending it as a bound parameter.",
+          "filename": "Aerovanta-main/src/pages/Treatments.jsx",
+          "fix": "Use parameterized queries or prepared statements so the database parses the SQL once and treats input as plain data.",
+          "language": "javascript",
+          "line": 22,
+          "matched_text": "update(id, { is_favorite: !isFavorite }",
+          "owasp_category": "A03 Injection",
+          "patched_code": "const [rows] = await db.execute(\"SELECT * FROM users WHERE id = ?\", [userInput]);",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 88,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "sql-inline-query",
+              "status": "flagged",
+              "summary": "SQL statements built from runtime values can let attackers alter the query structure."
+            },
+            "stage_2": {
+              "confidence": 78,
+              "fallback_reason": "GEMINI_API_KEY is not configured.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A03 Injection",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A03 Injection and included it in the weighted security score."
+            }
+          },
+          "rule_id": "sql-inline-query",
+          "rule_ids": [
+            "sql-inline-query"
+          ],
+          "severity": "HIGH",
+          "signals": [
+            "SQL statements built from runtime values can let attackers alter the query structure."
+          ],
+          "snippet": "appClient.entities.Treatment.update(id, { is_favorite: !isFavorite }),",
+          "type": "SQL Injection"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "Anyone positioned on the network path can read or tamper with the request and response data.",
+          "confidence": 70,
+          "description": "Plain HTTP exposes credentials and payloads to interception and tampering.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The code is calling an HTTP endpoint without transport encryption.",
+          "filename": "Aerovanta-main/vite.config.js",
+          "fix": "Switch the endpoint to HTTPS and enforce TLS validation on the client.",
+          "language": "javascript",
+          "line": 15,
+          "matched_text": "http://127.0.0.1:5000",
+          "owasp_category": "A02 Cryptographic Failures",
+          "patched_code": "const response = await fetch(\"https://api.example.com/v1/users\");",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 76,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "insecure-http",
+              "status": "flagged",
+              "summary": "Plain HTTP exposes credentials and payloads to interception and tampering."
+            },
+            "stage_2": {
+              "confidence": 70,
+              "fallback_reason": "Skipped Gemini review because project policy only sends HIGH or higher findings to the model.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A02 Cryptographic Failures",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A02 Cryptographic Failures and included it in the weighted security score."
+            }
+          },
+          "rule_id": "insecure-http",
+          "rule_ids": [
+            "insecure-http"
+          ],
+          "severity": "MEDIUM",
+          "signals": [
+            "Plain HTTP exposes credentials and payloads to interception and tampering."
+          ],
+          "snippet": "target: process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:5000',",
+          "type": "Insecure API Call"
+        },
+        {
+          "ai_provider": "local",
+          "attack_scenario": "Anyone positioned on the network path can read or tamper with the request and response data.",
+          "confidence": 70,
+          "description": "Plain HTTP exposes credentials and payloads to interception and tampering.",
+          "detection_method": "regex",
+          "detection_methods": [
+            "regex"
+          ],
+          "explanation": "The code is calling an HTTP endpoint without transport encryption.",
+          "filename": "Aerovanta-main/vite.config.js",
+          "fix": "Switch the endpoint to HTTPS and enforce TLS validation on the client.",
+          "language": "javascript",
+          "line": 20,
+          "matched_text": "http://127.0.0.1:5000",
+          "owasp_category": "A02 Cryptographic Failures",
+          "patched_code": "const response = await fetch(\"https://api.example.com/v1/users\");",
+          "review_decision": "needs_manual_review",
+          "review_pipeline": {
+            "stage_1": {
+              "confidence": 76,
+              "detection_methods": [
+                "regex"
+              ],
+              "name": "Stage 1 - Statistical Pattern Analysis",
+              "signal": "insecure-http",
+              "status": "flagged",
+              "summary": "Plain HTTP exposes credentials and payloads to interception and tampering."
+            },
+            "stage_2": {
+              "confidence": 70,
+              "fallback_reason": "Skipped Gemini review because project policy only sends HIGH or higher findings to the model.",
+              "name": "Stage 2 - Gemini AI Review",
+              "provider": "local",
+              "status": "fallback_applied",
+              "summary": "Gemini was not used for this finding, so deterministic local guidance was applied."
+            },
+            "stage_3": {
+              "category": "A02 Cryptographic Failures",
+              "name": "Stage 3 - OWASP Correlation & Risk Scoring",
+              "status": "mapped",
+              "summary": "Mapped this issue to A02 Cryptographic Failures and included it in the weighted security score."
+            }
+          },
+          "rule_id": "insecure-http",
+          "rule_ids": [
+            "insecure-http"
+          ],
+          "severity": "MEDIUM",
+          "signals": [
+            "Plain HTTP exposes credentials and payloads to interception and tampering."
+          ],
+          "snippet": "target: process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:5000',",
+          "type": "Insecure API Call"
+        }
+      ]
+    }
+  },
   "charlesabhishekreddy-spec/Secure-code-review:main": {
     "cached_at": 1773363908.9882057,
     "result": {
